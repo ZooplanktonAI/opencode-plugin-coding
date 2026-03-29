@@ -133,6 +133,7 @@ Append these entries to the project's `.gitignore` idempotently (only add lines 
 .opencode/reviewer-knowledge.json
 .opencode/plans/
 .opencode/retrospectives/
+.opencode/designs/
 .worktrees/
 ```
 

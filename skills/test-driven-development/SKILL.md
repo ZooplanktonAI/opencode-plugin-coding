@@ -5,7 +5,7 @@ description: Enforce RED-GREEN-REFACTOR test-driven development cycle. Write fai
 
 # Test-Driven Development
 
-Enforce the RED-GREEN-REFACTOR test-driven development cycle. This skill is **opt-in** — enable it in `workflow.json` → `tdd.enabled: true`.
+Enforce the RED-GREEN-REFACTOR test-driven development cycle. This skill is **opt-in** — enable it in `workflow.json` → `testDrivenDevelopment.enabled: true`.
 
 When active, the core-coder must write failing tests before implementation code. This ensures test coverage is a first-class deliverable, not an afterthought.
 
@@ -15,7 +15,7 @@ Inspired by the test-driven-development skill from Superpowers.
 
 ## When to Activate
 
-- `workflow.json` → `tdd.enabled` is `true`
+- `workflow.json` → `testDrivenDevelopment.enabled` is `true`
 - User explicitly requests TDD approach
 - The orchestrator or core-coder decides TDD is appropriate for a task
 
@@ -87,7 +87,7 @@ For these, write tests after implementation (or skip if truly trivial).
 
 ## Integration with Orchestrate
 
-When `tdd.enabled` is true, the `orchestrate` skill modifies the core-coder implementation template:
+When `testDrivenDevelopment.enabled` is true, the `orchestrate` skill modifies the core-coder implementation template:
 
 ```
 Implement the approved plan using TDD (RED-GREEN-REFACTOR cycle).

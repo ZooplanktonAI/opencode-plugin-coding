@@ -5,7 +5,7 @@ description: Create and manage isolated git worktrees for parallel development. 
 
 # Git Worktree
 
-Manage isolated git worktrees for the multi-agent workflow. Each agent (core-coder, core-reviewer-primary, core-reviewer-secondary) works in its own worktree to avoid conflicts.
+Manage isolated git worktrees for the multi-agent workflow. Each agent works in its own worktree to avoid conflicts. Read agent names from `workflow.json` → `agents`.
 
 ---
 
@@ -21,9 +21,8 @@ Manage isolated git worktrees for the multi-agent workflow. Each agent (core-cod
 
 | Agent | Path | Purpose |
 |-------|------|---------|
-| core-coder | `.worktrees/core-coder` | Implementation workspace |
-| core-reviewer-primary | `.worktrees/core-reviewer-primary` | Code review with full verification |
-| core-reviewer-secondary | `.worktrees/core-reviewer-secondary` | Code review with full verification |
+| `coreCoder` | `.worktrees/<coreCoder.name>` | Implementation workspace |
+| Each `coreReviewers` entry | `.worktrees/<entry.name>` | Code review with full verification |
 
 Normal reviewers do **not** need worktrees — they use `gh pr diff` (read-only).
 
@@ -33,10 +32,14 @@ Normal reviewers do **not** need worktrees — they use `gh pr diff` (read-only)
 
 ### Create worktrees (idempotent)
 
+Read `agents.coreCoder` and `agents.coreReviewers` from `workflow.json`. For each, create a worktree if it doesn't exist:
+
 ```bash
-ls .worktrees/core-coder 2>/dev/null || git worktree add --detach .worktrees/core-coder
-ls .worktrees/core-reviewer-primary 2>/dev/null || git worktree add --detach .worktrees/core-reviewer-primary
-ls .worktrees/core-reviewer-secondary 2>/dev/null || git worktree add --detach .worktrees/core-reviewer-secondary
+# For coreCoder:
+ls .worktrees/<coreCoder.name> 2>/dev/null || git worktree add --detach .worktrees/<coreCoder.name>
+
+# For each entry in coreReviewers:
+ls .worktrees/<entry.name> 2>/dev/null || git worktree add --detach .worktrees/<entry.name>
 ```
 
 ### Ensure .gitignore entry
@@ -48,7 +51,7 @@ ls .worktrees/core-reviewer-secondary 2>/dev/null || git worktree add --detach .
 After creating a new worktree, install dependencies:
 
 ```bash
-cd .worktrees/core-coder && <packageManager> install
+cd .worktrees/<agent-name> && <packageManager> install
 ```
 
 Core reviewer worktrees also need dependencies for running verification commands.
@@ -94,9 +97,11 @@ git checkout --detach origin/<pr-branch>
 Detach all worktrees so the feature branch can be deleted:
 
 ```bash
-git -C .worktrees/core-coder checkout --detach HEAD
-git -C .worktrees/core-reviewer-primary checkout --detach HEAD
-git -C .worktrees/core-reviewer-secondary checkout --detach HEAD
+# For coreCoder:
+git -C .worktrees/<coreCoder.name> checkout --detach HEAD
+
+# For each entry in coreReviewers:
+git -C .worktrees/<entry.name> checkout --detach HEAD
 ```
 
 Then delete the branch locally and remotely (handled by the `orchestrate` skill).

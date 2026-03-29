@@ -5,7 +5,7 @@ description: Full multi-agent software development workflow — implement, revie
 
 # Orchestrate
 
-The central orchestration skill. You (the Build agent) coordinate the full software development lifecycle: plan → implement → review → merge → retrospect.
+The central orchestration skill. You coordinate the full software development lifecycle: plan → implement → review → merge → retrospect.
 
 You dispatch subagents (`@<coreCoder.name>`, `@<coreReviewers[].name>`, `@<reviewers[].name>`, optionally `@<securityReviewers[].name>`) and manage the flow between them. All project-specific settings come from `.opencode/workflow.json`.
 
