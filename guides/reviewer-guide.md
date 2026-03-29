@@ -28,10 +28,12 @@ gh pr diff *   gh pr checks *
 Every comment — summary body, every inline comment, every reply — **must** start with:
 
 ```
-**[Round N] <your-model-id>:**
+**[Round N] <your-model-id> focus on <area-1>, <area-2>:**
 ```
 
-Example: `**[Round 2] alibaba-coding-plan-cn/glm-5:**`
+Include your assigned focus areas in the prefix so readers know what lens you reviewed through.
+
+Example: `**[Round 1] alibaba-coding-plan-cn/glm-5 focus on logic, tests:**`
 
 ---
 
@@ -68,7 +70,7 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews/$REVIEW_ID/comments \
 # Reply to each
 gh api repos/<REPO>/pulls/$PR_NUMBER/comments/$COMMENT_ID/replies \
   --method POST \
-  --field body="**[Round $ROUND] $MODEL_ID:** [ADDRESSED / PARTIALLY ADDRESSED / NOT ADDRESSED] — <one sentence>"
+  --field body="**[Round $ROUND] $MODEL_ID focus on $AREAS:** [ADDRESSED / PARTIALLY ADDRESSED / NOT ADDRESSED] — <one sentence>"
 ```
 
 Do **not** reply to other reviewers' comments.
@@ -115,6 +117,8 @@ COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid --jq '.headRefOid')
 
 #### Post with JSON heredoc (preferred)
 
+**If you found issues**, post them as inline comments with a brief summary body:
+
 ```bash
 gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
   --method POST \
@@ -123,18 +127,35 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
 {
   "commit_id": "ACTUAL_SHA",
   "event": "COMMENT",
-  "body": "**[Round N] model-id:**\n\n## Review Summary\n\n<overall assessment>\n\n### Findings\n1. [Blocking] ...\n2. [Advisory] ...",
+  "body": "**[Round N] model-id focus on area-1, area-2:**\n\n### Findings\n1. [Blocking] ...\n2. [Advisory] ...",
   "comments": [
     {
       "path": "src/path/to/file.ts",
       "line": 42,
       "side": "RIGHT",
-      "body": "**[Round N] model-id:**\n<inline comment>"
+      "body": "**[Round N] model-id focus on area-1, area-2:**\n<inline comment>"
     }
   ]
 }
 EOF
 ```
+
+**If you found NO issues**, you **must still post a review** — post LGTM with no inline comments:
+
+```bash
+gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
+  --method POST \
+  --header "Content-Type: application/json" \
+  --input - <<'EOF'
+{
+  "commit_id": "ACTUAL_SHA",
+  "event": "COMMENT",
+  "body": "**[Round N] model-id focus on area-1, area-2:** LGTM"
+}
+EOF
+```
+
+Do **not** summarize what the PR does, describe the changes, or add preambles. The review body contains **only** findings or LGTM — nothing else.
 
 #### Alternative: Post with --field flags
 
@@ -147,13 +168,13 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
   --field "comments[][path]=src/path/to/file.ts" \
   --field "comments[][line]=42" \
   --field "comments[][side]=RIGHT" \
-  --field "comments[][body]=**[Round $ROUND] $MODEL_ID:** <comment text>"
+  --field "comments[][body]=**[Round $ROUND] $MODEL_ID focus on $AREAS:** <comment text>"
 ```
 
 **Rules:**
 
 - `event`: always `"COMMENT"` — never `"APPROVE"` or `"REQUEST_CHANGES"`
-- `body` (review summary): **must never be empty** — write at least one sentence even if all detail is inline
+- `body` (review summary): **must never be empty** — write findings list or LGTM
 - `line`: must be a line number present in the diff RIGHT side — verify before posting
 - `side`: `"RIGHT"` always
 - Omit `comments` array entirely when no inline comments
@@ -168,7 +189,8 @@ Check that the response contains `"id":`. If absent or errored, retry once using
 ## Conciseness Rules (Strictly Enforced)
 
 - Each inline comment: **1–3 sentences max** — state the issue, cite the line, done
-- Review summary: **bullet list of findings only** — no conversational preambles, no conclusion paragraphs
+- Review summary: **findings list only, or LGTM** — no PR description, no preambles, no conclusion paragraphs
+- Do **not** summarize what the PR does — reviewers report issues, not describe changes
 - No verbose spec quotes or summaries
 
 ---
