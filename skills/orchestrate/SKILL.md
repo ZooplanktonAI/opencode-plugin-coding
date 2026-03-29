@@ -29,7 +29,8 @@ Read `.opencode/workflow.json` at the start of every orchestration. Key fields:
 - `project.repo` — GitHub repo (e.g. `Org/repo-name`). Hardcode in all `gh` commands.
 - `project.defaultBranch` — typically `main` or `master`
 - `commands.*` — verification commands (typecheck, lint, test, build)
-- `agents.*` — model assignments and counts
+- `agents.coreReviewers` — array of `{ name, model }` for core reviewers (blocking quorum)
+- `agents.reviewers` — array of `{ name, model }` for normal reviewers (non-blocking)
 - `agents.securityReviewer.enabled` — whether to run pre-merge security review
 - `docsToRead` — files all agents must read before working
 - `reviewFocus` — project-specific review emphasis (passed to reviewers)
@@ -38,13 +39,19 @@ Read `.opencode/workflow.json` at the start of every orchestration. Key fields:
 
 ## Worktree Setup (One-Time)
 
-Before the first task, ensure persisted worktrees exist:
+Before the first task, ensure persisted worktrees exist for the core-coder and all core reviewers:
 
 ```bash
+# Core coder worktree
 ls .worktrees/core-coder 2>/dev/null || git worktree add --detach .worktrees/core-coder
+
+# Core reviewer worktrees — create one per entry in agents.coreReviewers
+# Example for the default 2-reviewer config:
 ls .worktrees/core-reviewer-primary 2>/dev/null || git worktree add --detach .worktrees/core-reviewer-primary
 ls .worktrees/core-reviewer-secondary 2>/dev/null || git worktree add --detach .worktrees/core-reviewer-secondary
 ```
+
+Read `agents.coreReviewers` from `workflow.json` and create a worktree at `.worktrees/<entry.name>` for each entry.
 
 `.worktrees/` must be in `.gitignore`. The `/init` command handles this automatically.
 
@@ -108,14 +115,21 @@ If `workflow.json` → `agents.securityReviewer.enabled` is `true`:
 
 ### 3b. Parallel Code Review
 
-Invoke **all reviewers in a single parallel message** (one Task call per reviewer):
+Invoke **all reviewers in a single parallel message** (one Task call per reviewer).
 
-**Core reviewers** (blocking quorum — must wait for both):
-- `@core-reviewer-primary` — worktree `.worktrees/core-reviewer-primary`
-- `@core-reviewer-secondary` — worktree `.worktrees/core-reviewer-secondary`
+Read `agents.coreReviewers` and `agents.reviewers` arrays from `workflow.json`. Each entry has `name` (the agent name to invoke with `@<name>`) and `model` (the model ID to pass as `$MODEL_ID` in the template).
+
+**Core reviewers** (blocking quorum — must wait for all):
+
+For each entry in `agents.coreReviewers`, invoke `@<entry.name>`:
+- Assign worktree `.worktrees/<entry.name>`
+- Pass model ID `<entry.model>`
 
 **Normal reviewers** (non-blocking — include if available):
-- All configured normal reviewers (e.g., `@reviewer-glm`, `@reviewer-minimax`, `@reviewer-qwen`, `@reviewer-kimi`, `@reviewer-ark`, `@reviewer-deepseek`)
+
+For each entry in `agents.reviewers`, invoke `@<entry.name>`:
+- Pass model ID `<entry.model>`
+- Assign 1-2 review areas via adaptive round-robin (see Reviewer Assignment Strategy)
 
 Each reviewer follows their respective guide (`guides/core-reviewer-guide.md` or `guides/reviewer-guide.md`).
 
@@ -384,9 +398,10 @@ After the user approves, merge and clean up:
 BRANCH=$(gh pr view $PR_NUMBER --json headRefName -q ".headRefName")
 gh pr merge $PR_NUMBER --squash --admin --repo <REPO>
 git checkout <defaultBranch> && git pull --ff-only origin <defaultBranch>
+# Detach all worktrees (core-coder + each core reviewer from agents.coreReviewers)
 git -C .worktrees/core-coder checkout --detach HEAD
-git -C .worktrees/core-reviewer-primary checkout --detach HEAD
-git -C .worktrees/core-reviewer-secondary checkout --detach HEAD
+# For each entry in agents.coreReviewers:
+git -C .worktrees/<entry.name> checkout --detach HEAD
 git branch -D $BRANCH
 git push origin --delete $BRANCH 2>/dev/null || true
 git remote prune origin

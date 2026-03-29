@@ -45,8 +45,18 @@ Use these defaults (user can adjust later):
 ```json
 {
   "coreCoder": { "model": "github-copilot/claude-opus-4.6" },
-  "coreReviewers": { "model": "github-copilot/claude-sonnet-4.6", "count": 2 },
-  "reviewers": { "model": "", "count": 4 },
+  "coreReviewers": [
+    { "name": "core-reviewer-primary", "model": "github-copilot/claude-sonnet-4.6" },
+    { "name": "core-reviewer-secondary", "model": "github-copilot/gpt-5.4" }
+  ],
+  "reviewers": [
+    { "name": "reviewer-glm", "model": "alibaba-coding-plan-cn/glm-5" },
+    { "name": "reviewer-minimax", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" },
+    { "name": "reviewer-qwen", "model": "alibaba-coding-plan-cn/qwen3.5-plus" },
+    { "name": "reviewer-kimi", "model": "alibaba-coding-plan-cn/kimi-k2.5" },
+    { "name": "reviewer-ark", "model": "volcengine-plan/ark-code-latest" },
+    { "name": "reviewer-deepseek", "model": "volcengine-plan/deepseek-v3.2" }
+  ],
   "securityReviewer": { "enabled": false }
 }
 ```
@@ -86,8 +96,18 @@ Create `.opencode/workflow.json` with the detected settings. Use the template st
   },
   "agents": {
     "coreCoder": { "model": "github-copilot/claude-opus-4.6" },
-    "coreReviewers": { "model": "github-copilot/claude-sonnet-4.6", "count": 2 },
-    "reviewers": { "model": "", "count": 4 },
+    "coreReviewers": [
+      { "name": "core-reviewer-primary", "model": "github-copilot/claude-sonnet-4.6" },
+      { "name": "core-reviewer-secondary", "model": "github-copilot/gpt-5.4" }
+    ],
+    "reviewers": [
+      { "name": "reviewer-glm", "model": "alibaba-coding-plan-cn/glm-5" },
+      { "name": "reviewer-minimax", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" },
+      { "name": "reviewer-qwen", "model": "alibaba-coding-plan-cn/qwen3.5-plus" },
+      { "name": "reviewer-kimi", "model": "alibaba-coding-plan-cn/kimi-k2.5" },
+      { "name": "reviewer-ark", "model": "volcengine-plan/ark-code-latest" },
+      { "name": "reviewer-deepseek", "model": "volcengine-plan/deepseek-v3.2" }
+    ],
     "securityReviewer": { "enabled": false }
   },
   "tdd": { "enabled": false },
@@ -148,7 +168,8 @@ After setup, print a summary:
 
 **Manual review checklist:**
 - [ ] Verify detected commands are correct in `.opencode/workflow.json`
-- [ ] Set reviewer model IDs if using specific models for normal reviewers
+- [ ] Verify reviewer names and model IDs in `agents.coreReviewers` and `agents.reviewers`
+- [ ] Add or remove reviewer entries to match your available agent files
 - [ ] Enable `securityReviewer` if needed
 - [ ] Enable `tdd` if using test-driven development
 - [ ] Set `reviewFocus` if this project has a specific review emphasis

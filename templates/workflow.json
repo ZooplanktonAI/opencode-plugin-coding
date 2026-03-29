@@ -18,8 +18,13 @@
   },
   "agents": {
     "coreCoder": { "model": "" },
-    "coreReviewers": { "model": "", "count": 2 },
-    "reviewers": { "model": "", "count": 4 },
+    "coreReviewers": [
+      { "name": "core-reviewer-primary", "model": "" },
+      { "name": "core-reviewer-secondary", "model": "" }
+    ],
+    "reviewers": [
+      { "name": "reviewer-1", "model": "" }
+    ],
     "securityReviewer": { "enabled": false }
   },
   "tdd": { "enabled": false },
