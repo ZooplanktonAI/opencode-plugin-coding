@@ -101,7 +101,11 @@ Perform a systematic security review across these categories:
 
 ```bash
 COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid --jq '.headRefOid')
+```
 
+**If you found security issues**, post findings with inline comments:
+
+```bash
 gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
   --method POST \
   --header "Content-Type: application/json" \
@@ -109,7 +113,7 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
 {
   "commit_id": "ACTUAL_SHA",
   "event": "COMMENT",
-  "body": "**[Security] model-id:**\n\n## Security Review\n\n### Overall Risk: LOW / MEDIUM / HIGH / CRITICAL\n\n### Findings\n1. [Critical/High/Medium/Low/Info] ...\n\n### Verdict: PASS / BLOCK\n<If BLOCK: list critical/high findings that must be addressed>",
+  "body": "**[Security] model-id:**\n\n### Overall Risk: MEDIUM / HIGH / CRITICAL\n\n### Findings\n1. [Critical/High/Medium/Low/Info] ...\n\n### Verdict: BLOCK",
   "comments": [
     {
       "path": "src/path/to/file.ts",
@@ -122,6 +126,23 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
 EOF
 ```
 
+**If you found NO security issues**, you **must still post a review** — post PASS:
+
+```bash
+gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
+  --method POST \
+  --header "Content-Type: application/json" \
+  --input - <<'EOF'
+{
+  "commit_id": "ACTUAL_SHA",
+  "event": "COMMENT",
+  "body": "**[Security] model-id:** PASS — no security issues found"
+}
+EOF
+```
+
+Do **not** summarize what the PR does or describe the changes. The review body contains **only** findings + verdict, or PASS — nothing else.
+
 **Rules:** Same as normal reviewer — `event: "COMMENT"`, verify line numbers, use single-quoted heredoc.
 
 ---
@@ -129,7 +150,8 @@ EOF
 ## Conciseness Rules (Strictly Enforced)
 
 - Each inline comment: **1–3 sentences max**
-- Summary: **bullet list of findings only** — no preambles
+- Summary: **findings + verdict only, or PASS** — no PR description, no preambles
+- Do **not** summarize what the PR does — report security findings only
 - No duplicate posts
 
 ---

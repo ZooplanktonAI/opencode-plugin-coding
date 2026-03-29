@@ -131,6 +131,8 @@ COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid --jq '.headRefOid')
 
 #### Post with JSON heredoc (preferred — most reliable)
 
+**If you found issues**, post them as inline comments with verification results and findings:
+
 ```bash
 gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
   --method POST \
@@ -139,7 +141,7 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
 {
   "commit_id": "ACTUAL_SHA",
   "event": "COMMENT",
-  "body": "**[Round N] model-id:**\n\n## Review Summary\n\n### Verification Results\n\n| Command | Result |\n|---|---|\n| `<typecheck>` | PASS / FAIL |\n| `<lint>` | PASS / FAIL |\n| `<test>` | PASS / FAIL |\n| `<build>` | PASS / FAIL |\n\n### Overall Assessment\n<assessment>\n\n### Findings\n<list issues or 'No issues found.'>",
+  "body": "**[Round N] model-id:**\n\n### Verification\n| Command | Result |\n|---|---|\n| `<typecheck>` | PASS / FAIL |\n| `<lint>` | PASS / FAIL |\n| `<test>` | PASS / FAIL |\n| `<build>` | PASS / FAIL |\n\n### Findings\n1. [Blocking] ...\n2. [Advisory] ...",
   "comments": [
     {
       "path": "src/path/to/file.ts",
@@ -151,6 +153,23 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
 }
 EOF
 ```
+
+**If you found NO issues**, you **must still post a review** — post verification results + LGTM:
+
+```bash
+gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
+  --method POST \
+  --header "Content-Type: application/json" \
+  --input - <<'EOF'
+{
+  "commit_id": "ACTUAL_SHA",
+  "event": "COMMENT",
+  "body": "**[Round N] model-id:**\n\n### Verification\n| Command | Result |\n|---|---|\n| `<typecheck>` | PASS / FAIL |\n| `<lint>` | PASS / FAIL |\n| `<test>` | PASS / FAIL |\n| `<build>` | PASS / FAIL |\n\nLGTM"
+}
+EOF
+```
+
+Do **not** summarize what the PR does, describe the changes, or add preambles. The review body contains **only** verification results + findings or LGTM — nothing else.
 
 #### Alternative: Post with --field flags
 
@@ -169,7 +188,7 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
 **Rules:**
 
 - `event`: always `"COMMENT"` — never `"APPROVE"` or `"REQUEST_CHANGES"`
-- `body` (review summary): **must never be empty**
+- `body` (review summary): **must never be empty** — write verification results + findings list or LGTM
 - `line`: must be a line number present in the diff RIGHT side — verify before posting
 - `side`: `"RIGHT"` always
 - Omit `comments` entirely when no inline comments
@@ -184,7 +203,8 @@ Check that the response contains `"id":`. If absent or errored, retry once using
 ## Conciseness Rules (Strictly Enforced)
 
 - Each inline comment: **1–3 sentences max** — state the issue, cite the line, done
-- Review summary: **bullet list of findings only** — no conversational preambles, no conclusion paragraphs
+- Review summary: **verification results + findings list, or verification results + LGTM** — no PR description, no preambles, no conclusion paragraphs
+- Do **not** summarize what the PR does — reviewers report issues, not describe changes
 - No verbose spec quotes or summaries
 - Duplicate-post guard: check if a review from you for the current round already exists before posting
 
