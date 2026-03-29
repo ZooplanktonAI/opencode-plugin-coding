@@ -143,7 +143,22 @@ EOF
 
 Do **not** summarize what the PR does or describe the changes. The review body contains **only** findings + verdict, or PASS — nothing else.
 
-**Rules:** Same as normal reviewer — `event: "COMMENT"`, verify line numbers, use single-quoted heredoc.
+**Rules:**
+
+- `event`: always `"COMMENT"` — never `"APPROVE"` or `"REQUEST_CHANGES"`
+- `body` (review summary): **must never be empty** — write findings + verdict, or PASS
+- `line`: must be a line number present in the **diff hunk RIGHT side** — see validation step below
+- `side`: `"RIGHT"` always
+- Omit `comments` array entirely when no inline comments
+- Use `<<'EOF'` (single-quoted) so the shell does not expand `$` inside JSON
+
+#### Validate line numbers before posting
+
+For each inline comment, confirm the target line appears in the diff. Run `gh pr diff $PR_NUMBER` and find the file's hunk. Only lines with a `+` prefix (added) or ` ` prefix (context) on the RIGHT side are valid targets. Lines with `-` prefix (removed) are LEFT-side only and will cause a posting error. If the line number is not in any hunk, the GitHub API will reject the comment — **do not guess line numbers from the full file**; use only lines visible in the diff output.
+
+#### Verify posting succeeded
+
+Check that the response contains `"id":`. If absent or errored, retry once using the `--field` form. Report success/failure — **do not silently discard findings**.
 
 ---
 
