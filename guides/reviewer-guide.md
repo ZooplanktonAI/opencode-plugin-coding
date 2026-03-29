@@ -1,6 +1,6 @@
 # Normal Reviewer Guide
 
-Applies to all normal reviewer agents (e.g., `reviewer-1`, `reviewer-2`, etc.).
+Applies to all normal reviewer agents (e.g., `reviewer-glm`, `reviewer-minimax`, etc.).
 
 Normal reviewers perform diff-based code review via GitHub API. They do not have worktree access or run verification commands.
 

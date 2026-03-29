@@ -73,16 +73,16 @@ Create `.opencode/workflow.json` with the detected settings. The `agents` sectio
   "agents": {
     "coreCoder": { "name": "core-coder", "model": "github-copilot/claude-opus-4.6" },
     "coreReviewers": [
-      { "name": "core-reviewer-1", "model": "github-copilot/claude-sonnet-4.6" },
-      { "name": "core-reviewer-2", "model": "github-copilot/gpt-5.4" }
+      { "name": "core-reviewer-primary", "model": "github-copilot/claude-sonnet-4.6" },
+      { "name": "core-reviewer-secondary", "model": "github-copilot/gpt-5.4" }
     ],
     "reviewers": [
-      { "name": "reviewer-1", "model": "alibaba-coding-plan-cn/glm-5" },
-      { "name": "reviewer-2", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" },
-      { "name": "reviewer-3", "model": "alibaba-coding-plan-cn/qwen3.5-plus" },
-      { "name": "reviewer-4", "model": "alibaba-coding-plan-cn/kimi-k2.5" },
-      { "name": "reviewer-5", "model": "volcengine-plan/ark-code-latest" },
-      { "name": "reviewer-6", "model": "volcengine-plan/deepseek-v3.2" }
+      { "name": "reviewer-glm", "model": "alibaba-coding-plan-cn/glm-5" },
+      { "name": "reviewer-minimax", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" },
+      { "name": "reviewer-qwen", "model": "alibaba-coding-plan-cn/qwen3.5-plus" },
+      { "name": "reviewer-kimi", "model": "alibaba-coding-plan-cn/kimi-k2.5" },
+      { "name": "reviewer-ark", "model": "volcengine-plan/ark-code-latest" },
+      { "name": "reviewer-deepseek", "model": "volcengine-plan/deepseek-v3.2" }
     ],
     "securityReviewers": []
   },
@@ -143,8 +143,8 @@ After setup, print a summary:
 
 **Agents configured (via workflow.json):**
 - Core coder: `core-coder` → `github-copilot/claude-opus-4.6`
-- Core reviewers: `core-reviewer-1`, `core-reviewer-2`
-- Normal reviewers: `reviewer-1` ... `reviewer-6`
+- Core reviewers: `core-reviewer-primary`, `core-reviewer-secondary`
+- Normal reviewers: `reviewer-glm`, `reviewer-minimax`, `reviewer-qwen`, `reviewer-kimi`, `reviewer-ark`, `reviewer-deepseek`
 - Security reviewers: (none — add to workflow.json to enable)
 
 **Files created/updated:**

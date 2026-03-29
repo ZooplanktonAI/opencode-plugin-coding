@@ -48,8 +48,8 @@ ls .worktrees/core-coder 2>/dev/null || git worktree add --detach .worktrees/cor
 
 # Core reviewer worktrees — create one per name in agents.coreReviewers
 # Example for the default 2-reviewer config:
-ls .worktrees/core-reviewer-1 2>/dev/null || git worktree add --detach .worktrees/core-reviewer-1
-ls .worktrees/core-reviewer-2 2>/dev/null || git worktree add --detach .worktrees/core-reviewer-2
+ls .worktrees/core-reviewer-primary 2>/dev/null || git worktree add --detach .worktrees/core-reviewer-primary
+ls .worktrees/core-reviewer-secondary 2>/dev/null || git worktree add --detach .worktrees/core-reviewer-secondary
 ```
 
 Read `agents.coreCoder.name` and each `agents.coreReviewers[i].name` from `workflow.json`. Create a worktree at `.worktrees/<name>` for each.

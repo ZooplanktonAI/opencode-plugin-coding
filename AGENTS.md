@@ -52,8 +52,8 @@ All content files are markdown (`.md`). The only JS file is the plugin entry poi
 ### Naming
 
 - **Config fields:** camelCase (`coreCoder`, `coreReviewers`, `testDrivenDevelopment`, `reviewFocus`)
-- **Agent names:** kebab-case with numeric suffix (`core-coder`, `core-reviewer-1`, `reviewer-3`)
-- **Agent names are model-agnostic:** Never put model names in agent names. Model is defined only in `workflow.json` → `agents` → `{ name, model }`.
+- **Agent names:** kebab-case, descriptive of role (e.g., `core-coder`, `core-reviewer-primary`, `reviewer-glm`)
+- **Agent names may reflect model identity** when it aids clarity (e.g., `reviewer-glm`, `reviewer-deepseek`). The name is free-form — the model is set separately in `workflow.json` → `agents` → `{ name, model }`.
 - **Command names:** prefixed with `zooplankton-coding-` to avoid colliding with OpenCode built-ins
 
 ### Agent architecture

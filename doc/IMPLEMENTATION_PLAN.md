@@ -200,8 +200,8 @@ Target structure:
   },
   "agents": {
     "coreCoder": "core-coder",
-    "coreReviewers": ["core-reviewer-1", "core-reviewer-2"],
-    "reviewers": ["reviewer-1"],
+    "coreReviewers": ["core-reviewer-primary", "core-reviewer-secondary"],
+    "reviewers": ["reviewer-glm"],
     "securityReviewers": []
   },
   "testDrivenDevelopment": { "enabled": false },

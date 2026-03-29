@@ -21,7 +21,7 @@ Checklist for validating the orchestrate workflow end-to-end within this reposit
 
 | # | Checkpoint | Expected |
 |---|------------|----------|
-| 1 | Worktrees created | `.worktrees/core-coder`, `.worktrees/core-reviewer-1`, `.worktrees/core-reviewer-2` exist |
+| 1 | Worktrees created | `.worktrees/core-coder`, `.worktrees/core-reviewer-primary`, `.worktrees/core-reviewer-secondary` exist |
 | 2 | Plan file written | `.opencode/plans/<branch>.md` exists with `status: not_started` → `in_progress` |
 | 3 | PR created | `gh pr list` shows the PR against `master` |
 | 4 | Core reviewers ran | Both core reviewers posted review comments on the PR |
