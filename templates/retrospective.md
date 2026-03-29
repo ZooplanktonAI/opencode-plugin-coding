@@ -2,7 +2,7 @@
 branch: 
 date: 
 pr: 
-rounds: 
+rounds:   # integer: total review rounds completed
 ---
 
 # Retrospective: [Title]
@@ -35,7 +35,7 @@ rounds:
 
 ## Reviewer Knowledge Updates
 
-[JSON snippet to merge into `.opencode/reviewer-knowledge.json`. Format:]
+[Replace each placeholder below with actual values and merge into `.opencode/reviewer-knowledge.json`. Example format:]
 
 ```json
 {
