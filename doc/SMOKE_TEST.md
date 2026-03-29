@@ -25,7 +25,7 @@ Checklist for validating the orchestrate workflow end-to-end within this reposit
 | 2 | Plan file written | `.opencode/plans/<branch>.md` exists with `status: not_started` → `in_progress` |
 | 3 | PR created | `gh pr list` shows the PR against `master` |
 | 4 | Core reviewers ran | Both core reviewers posted review comments on the PR |
-| 5 | Normal reviewers dispatched | At least some normal reviewers posted comments (non-blocking) |
+| 5 | Normal reviewers dispatched | Normal reviewers dispatched (non-blocking; zero or more may post before deadline) |
 | 6 | Revision rounds | If blocking issues found, core-coder was re-invoked (max 3 rounds) |
 | 7 | Pre-merge summary | PR comment with "Pre-Merge PR Summary" section posted before merge prompt |
 | 8 | User approval | Orchestrator asked for explicit user confirmation before merging |

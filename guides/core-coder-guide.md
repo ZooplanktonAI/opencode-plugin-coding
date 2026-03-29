@@ -85,7 +85,7 @@ After plan approval:
 
 ## Full Verification
 
-Before creating or updating a PR, run every verification command from `workflow.json` → `commands`. All must pass.
+Before creating or updating a PR, run every verification command from `workflow.json` → `commands`. All configured commands must pass.
 
 Example (adapt to your project):
 
@@ -97,7 +97,9 @@ Example (adapt to your project):
 <build command>  # if configured
 ```
 
-If any command fails, fix it before finalizing.
+Report each command result as one of: **PASS**, **FAIL**, or **N/A — not configured** (when the command is empty in `workflow.json`).
+
+If any configured command fails, fix it before finalizing.
 
 ---
 
