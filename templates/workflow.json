@@ -3,7 +3,7 @@
   "project": {
     "name": "",
     "repo": "",
-    "defaultBranch": "main"
+    "defaultBranch": "master"
   },
   "stack": {
     "language": "",
@@ -17,14 +17,9 @@
     "typecheck": ""
   },
   "agents": {
-    "coreCoder": { "name": "core-coder", "model": "" },
-    "coreReviewers": [
-      { "name": "core-reviewer-primary", "model": "" },
-      { "name": "core-reviewer-secondary", "model": "" }
-    ],
-    "reviewers": [
-      { "name": "reviewer-1", "model": "" }
-    ],
+    "coreCoder": "core-coder",
+    "coreReviewers": ["core-reviewer-1", "core-reviewer-2"],
+    "reviewers": ["reviewer-1"],
     "securityReviewers": []
   },
   "testDrivenDevelopment": { "enabled": false },

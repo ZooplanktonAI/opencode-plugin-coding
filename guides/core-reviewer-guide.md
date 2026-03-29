@@ -1,6 +1,6 @@
 # Core Reviewer Guide
 
-Applies to: `core-reviewer-primary`, `core-reviewer-secondary`.
+Applies to all core reviewer agents (e.g., `core-reviewer-1`, `core-reviewer-2`).
 
 Core reviewers differ from normal reviewers in three ways: worktree checkout, full verification (all gate commands), and deep cross-reviewer analysis.
 
@@ -10,7 +10,7 @@ Core reviewers differ from normal reviewers in three ways: worktree checkout, fu
 
 - **Repository:** Use the repo name from `.opencode/workflow.json` → `project.repo`. Hardcode it in all `gh api` calls — never resolve dynamically.
 - **Substitute all placeholders:** `PR_NUMBER`, `BRANCH`, `ROUND`, `MODEL_ID`, `SHA` are templates. Replace with actual values before running any command.
-- **Worktrees:** `core-reviewer-primary` uses `.worktrees/core-reviewer-primary`; `core-reviewer-secondary` uses `.worktrees/core-reviewer-secondary`.
+- **Worktrees:** Each core reviewer uses `.worktrees/<own-agent-name>` (e.g., `core-reviewer-1` uses `.worktrees/core-reviewer-1`).
 
 ---
 

@@ -36,7 +36,12 @@ The plugin should reduce duplicated local skill files, preserve project-specific
   - `templates/workflow.json`
   - `templates/plan.md`
   - `templates/retrospective.md`
+  - `templates/agents/core-coder.md`
+  - `templates/agents/core-reviewer.md`
+  - `templates/agents/reviewer.md`
+  - `templates/agents/security-reviewer.md`
 - `/init` command to bootstrap project-level config.
+- `/update` command to sync agent files with latest plugin templates.
 
 ### Explicitly out of scope (v1)
 
@@ -181,7 +186,7 @@ Target structure:
   "project": {
     "name": "",
     "repo": "",
-    "defaultBranch": "main"
+    "defaultBranch": "master"
   },
   "stack": {
     "language": "",
@@ -195,14 +200,9 @@ Target structure:
     "typecheck": ""
   },
   "agents": {
-    "coreCoder": { "name": "core-coder", "model": "" },
-    "coreReviewers": [
-      { "name": "core-reviewer-primary", "model": "" },
-      { "name": "core-reviewer-secondary", "model": "" }
-    ],
-    "reviewers": [
-      { "name": "reviewer-1", "model": "" }
-    ],
+    "coreCoder": "core-coder",
+    "coreReviewers": ["core-reviewer-1", "core-reviewer-2"],
+    "reviewers": ["reviewer-1"],
     "securityReviewers": []
   },
   "testDrivenDevelopment": { "enabled": false },
@@ -220,12 +220,15 @@ Design principle: minimal required fields; add configurability only after cross-
 - Finalize repository scaffolding metadata (`README.md`, `opencode.json`, command registrations).
 - Ensure all skills have valid frontmatter and clear usage semantics.
 
-### Phase B: `/init` command
+### Phase B: `/init` and `/update` commands
 
 - Auto-detect project basics (`package.json`, git remote, branch, command candidates).
 - Generate `.opencode/workflow.json` from template.
+- Generate `.opencode/agents/*.md` from 4 agent templates (core-coder, core-reviewer, reviewer, security-reviewer) with model injection.
 - Update project `.gitignore` for ephemeral files.
 - Print setup summary + manual review checklist.
+- `/update` command diffs plugin templates vs project agent files, preserves model assignments, offers per-file accept/reject.
+- Agent templates include `# plugin-version: N` header for staleness detection.
 
 ### Phase C: Guides
 

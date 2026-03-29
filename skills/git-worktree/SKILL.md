@@ -21,8 +21,8 @@ Manage isolated git worktrees for the multi-agent workflow. Each agent works in 
 
 | Agent | Path | Purpose |
 |-------|------|---------|
-| `coreCoder` | `.worktrees/<coreCoder.name>` | Implementation workspace |
-| Each `coreReviewers` entry | `.worktrees/<entry.name>` | Code review with full verification |
+| `coreCoder` | `.worktrees/<coreCoder>` | Implementation workspace |
+| Each name in `coreReviewers` | `.worktrees/<name>` | Code review with full verification |
 
 Normal reviewers do **not** need worktrees — they use `gh pr diff` (read-only).
 
@@ -36,10 +36,10 @@ Read `agents.coreCoder` and `agents.coreReviewers` from `workflow.json`. For eac
 
 ```bash
 # For coreCoder:
-ls .worktrees/<coreCoder.name> 2>/dev/null || git worktree add --detach .worktrees/<coreCoder.name>
+ls .worktrees/<coreCoder> 2>/dev/null || git worktree add --detach .worktrees/<coreCoder>
 
-# For each entry in coreReviewers:
-ls .worktrees/<entry.name> 2>/dev/null || git worktree add --detach .worktrees/<entry.name>
+# For each name in coreReviewers:
+ls .worktrees/<name> 2>/dev/null || git worktree add --detach .worktrees/<name>
 ```
 
 ### Ensure .gitignore entry
@@ -98,10 +98,10 @@ Detach all worktrees so the feature branch can be deleted:
 
 ```bash
 # For coreCoder:
-git -C .worktrees/<coreCoder.name> checkout --detach HEAD
+git -C .worktrees/<coreCoder> checkout --detach HEAD
 
-# For each entry in coreReviewers:
-git -C .worktrees/<entry.name> checkout --detach HEAD
+# For each name in coreReviewers:
+git -C .worktrees/<name> checkout --detach HEAD
 ```
 
 Then delete the branch locally and remotely (handled by the `orchestrate` skill).

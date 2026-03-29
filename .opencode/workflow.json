@@ -2,7 +2,7 @@
   "project": {
     "name": "opencode-plugin-coding",
     "repo": "ZooplanktonAI/opencode-plugin-coding",
-    "defaultBranch": "main"
+    "defaultBranch": "master"
   },
   "stack": {
     "language": "markdown",
@@ -16,22 +16,10 @@
     "typecheck": ""
   },
   "agents": {
-    "coreCoder": { "name": "core-coder", "model": "github-copilot/claude-opus-4.6" },
-    "coreReviewers": [
-      { "name": "core-reviewer-primary", "model": "github-copilot/claude-sonnet-4.6" },
-      { "name": "core-reviewer-secondary", "model": "github-copilot/gpt-5.4" }
-    ],
-    "reviewers": [
-      { "name": "reviewer-glm", "model": "alibaba-coding-plan-cn/glm-5" },
-      { "name": "reviewer-minimax", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" },
-      { "name": "reviewer-qwen", "model": "alibaba-coding-plan-cn/qwen3.5-plus" },
-      { "name": "reviewer-kimi", "model": "alibaba-coding-plan-cn/kimi-k2.5" },
-      { "name": "reviewer-ark", "model": "volcengine-plan/ark-code-latest" },
-      { "name": "reviewer-deepseek", "model": "volcengine-plan/deepseek-v3.2" }
-    ],
-    "securityReviewers": [
-      { "name": "security-reviewer-glm", "model": "alibaba-coding-plan-cn/glm-5" }
-    ]
+    "coreCoder": "core-coder",
+    "coreReviewers": ["core-reviewer-1", "core-reviewer-2"],
+    "reviewers": ["reviewer-1", "reviewer-2", "reviewer-3", "reviewer-4", "reviewer-5", "reviewer-6"],
+    "securityReviewers": ["security-reviewer-1"]
   },
   "testDrivenDevelopment": { "enabled": false },
   "docsToRead": [],

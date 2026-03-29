@@ -14,6 +14,24 @@ A shared [OpenCode](https://opencode.ai) plugin for multi-agent software develop
 | `git-worktree` | Create and manage isolated git worktrees for parallel development |
 | `playwright` | Browser automation via Playwright MCP server |
 
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `/init` | Auto-detect project, generate `workflow.json` and agent files |
+| `/update` | Sync agent files with latest plugin templates (preserves model assignments) |
+
+## Agent Templates
+
+4 templates in `templates/agents/` cover all agent roles. Each has a `$MODEL` placeholder and a `# plugin-version: N` header for update tracking.
+
+| Template | Role | Default instances |
+|----------|------|-------------------|
+| `core-coder.md` | Core implementation agent | 1 |
+| `core-reviewer.md` | Core reviewer (blocking, worktree) | 2 |
+| `reviewer.md` | Normal reviewer (non-blocking, diff-based) | 6 |
+| `security-reviewer.md` | Security reviewer (pre-merge) | 0 (opt-in) |
+
 ## Guides
 
 - `guides/core-coder-guide.md` — Instructions for the core implementation agent
@@ -46,11 +64,22 @@ From your project root in OpenCode, run:
 This will:
 - Auto-detect project settings (language, framework, package manager, commands)
 - Generate `.opencode/workflow.json` with project-specific configuration
+- Generate `.opencode/agents/*.md` files for all configured agents (core-coder, reviewers, etc.)
 - Update `.gitignore` for ephemeral plugin files
 
 ### 3. Configure agents
 
-Set up agent files in `.opencode/agents/` for your core-coder, core-reviewers, and normal reviewers. See `AGENTS.md` in your project for the recommended setup.
+Review the generated agent files in `.opencode/agents/`. Each file is generated from one of 4 templates (`templates/agents/`) with the model ID injected. Adjust model IDs as needed — the agent names in `workflow.json` reference these files.
+
+### 4. Keep agents in sync
+
+When the plugin updates its agent templates, run:
+
+```
+/update
+```
+
+This diffs the plugin templates against your project's agent files, preserves your model assignments, and lets you accept or reject each change.
 
 ## Project-Level Files
 
@@ -72,7 +101,7 @@ After `/init`, your project will have:
   "project": {
     "name": "my-project",
     "repo": "Org/my-project",
-    "defaultBranch": "main"
+    "defaultBranch": "master"
   },
   "stack": {
     "language": "typescript",
@@ -86,19 +115,9 @@ After `/init`, your project will have:
     "typecheck": "npx tsc --noEmit"
   },
   "agents": {
-    "coreCoder": { "name": "core-coder", "model": "github-copilot/claude-opus-4.6" },
-    "coreReviewers": [
-      { "name": "core-reviewer-primary", "model": "github-copilot/claude-sonnet-4.6" },
-      { "name": "core-reviewer-secondary", "model": "github-copilot/gpt-5.4" }
-    ],
-    "reviewers": [
-      { "name": "reviewer-glm", "model": "alibaba-coding-plan-cn/glm-5" },
-      { "name": "reviewer-minimax", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" },
-      { "name": "reviewer-qwen", "model": "alibaba-coding-plan-cn/qwen3.5-plus" },
-      { "name": "reviewer-kimi", "model": "alibaba-coding-plan-cn/kimi-k2.5" },
-      { "name": "reviewer-ark", "model": "volcengine-plan/ark-code-latest" },
-      { "name": "reviewer-deepseek", "model": "volcengine-plan/deepseek-v3.2" }
-    ],
+    "coreCoder": "core-coder",
+    "coreReviewers": ["core-reviewer-1", "core-reviewer-2"],
+    "reviewers": ["reviewer-1", "reviewer-2", "reviewer-3", "reviewer-4", "reviewer-5", "reviewer-6"],
     "securityReviewers": []
   },
   "testDrivenDevelopment": { "enabled": false },
