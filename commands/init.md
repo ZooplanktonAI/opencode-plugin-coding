@@ -110,9 +110,9 @@ Create `.opencode/workflow.json` with the detected settings. Use the template st
     ],
     "securityReviewers": []
   },
-  "tdd": { "enabled": false },
+  "testDrivenDevelopment": { "enabled": false },
   "docsToRead": ["<detected>"],
-  "reviewFocus": ""
+  "reviewFocus": []
 }
 ```
 
@@ -171,7 +171,7 @@ After setup, print a summary:
 - [ ] Verify reviewer names and model IDs in `agents.coreReviewers` and `agents.reviewers`
 - [ ] Add or remove reviewer entries to match your available agent files
 - [ ] Add entries to `agents.securityReviewers` if needed
-- [ ] Enable `tdd` if using test-driven development
-- [ ] Set `reviewFocus` if this project has a specific review emphasis
+- [ ] Enable `testDrivenDevelopment` if using test-driven development
+- [ ] Set `reviewFocus` entries if this project has specific review emphases
 - [ ] Review `docsToRead` list and add any project-specific docs
 ```

@@ -34,7 +34,7 @@ Read `.opencode/workflow.json` at the start of every orchestration. Key fields:
 - `agents.reviewers` — array of `{ name, model }` for normal reviewers (non-blocking)
 - `agents.securityReviewers` — array of `{ name, model }` for security reviewers (empty = disabled)
 - `docsToRead` — files all agents must read before working
-- `reviewFocus` — project-specific review emphasis (passed to reviewers)
+- `reviewFocus` — array of project-specific review emphasis strings (passed to reviewers)
 
 ---
 

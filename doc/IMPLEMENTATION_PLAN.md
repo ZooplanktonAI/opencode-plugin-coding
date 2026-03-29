@@ -205,9 +205,9 @@ Target structure:
     ],
     "securityReviewers": []
   },
-  "tdd": { "enabled": false },
+  "testDrivenDevelopment": { "enabled": false },
   "docsToRead": [],
-  "reviewFocus": ""
+  "reviewFocus": []
 }
 ```
 

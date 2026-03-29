@@ -101,9 +101,9 @@ After `/init`, your project will have:
     ],
     "securityReviewers": []
   },
-  "tdd": { "enabled": false },
+  "testDrivenDevelopment": { "enabled": false },
   "docsToRead": ["AGENTS.md"],
-  "reviewFocus": ""
+  "reviewFocus": ["type safety", "error handling"]
 }
 ```
 

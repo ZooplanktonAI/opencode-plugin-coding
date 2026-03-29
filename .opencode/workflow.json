@@ -29,9 +29,11 @@
       { "name": "reviewer-ark", "model": "volcengine-plan/ark-code-latest" },
       { "name": "reviewer-deepseek", "model": "volcengine-plan/deepseek-v3.2" }
     ],
-    "securityReviewers": []
+    "securityReviewers": [
+      { "name": "security-reviewer-glm", "model": "alibaba-coding-plan-cn/glm-5" }
+    ]
   },
-  "tdd": { "enabled": false },
-  "docsToRead": ["doc/IMPLEMENTATION_PLAN.md"],
-  "reviewFocus": "skill correctness, guide clarity, template completeness"
+  "testDrivenDevelopment": { "enabled": false },
+  "docsToRead": [],
+  "reviewFocus": ["skill correctness", "guide clarity", "template completeness"]
 }
