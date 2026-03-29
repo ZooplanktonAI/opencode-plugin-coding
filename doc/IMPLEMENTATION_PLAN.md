@@ -40,8 +40,8 @@ The plugin should reduce duplicated local skill files, preserve project-specific
   - `templates/agents/core-reviewer.md`
   - `templates/agents/reviewer.md`
   - `templates/agents/security-reviewer.md`
-- `/init` command to bootstrap project-level config.
-- `/update` command to sync agent files with latest plugin templates.
+- `/zooplankton-coding-init` command to bootstrap project-level config.
+- `/zooplankton-coding-update` command to sync agent files with latest plugin templates.
 
 ### Explicitly out of scope (v1)
 
@@ -76,7 +76,7 @@ The plugin should reduce duplicated local skill files, preserve project-specific
 
 ### Init behavior
 
-- `/init` appends ignore entries to project `.gitignore` idempotently.
+- `/zooplankton-coding-init` appends ignore entries to project `.gitignore` idempotently.
 
 ## 5) Runtime State and Cleanup Rules
 
@@ -219,14 +219,14 @@ Design principle: minimal required fields; add configurability only after cross-
 - Finalize repository scaffolding metadata (`README.md`, `opencode.json`, command registrations).
 - Ensure all skills have valid frontmatter and clear usage semantics.
 
-### Phase B: `/init` and `/update` commands
+### Phase B: `/zooplankton-coding-init` and `/zooplankton-coding-update` commands
 
 - Auto-detect project basics (`package.json`, git remote, branch, command candidates).
 - Generate `.opencode/workflow.json` from template.
 - Generate `.opencode/agents/*.md` from 4 agent templates (core-coder, core-reviewer, reviewer, security-reviewer) with model injection.
 - Update project `.gitignore` for ephemeral files.
 - Print setup summary + manual review checklist.
-- `/update` command diffs plugin templates vs project agent files, preserves model assignments, offers per-file accept/reject.
+- `/zooplankton-coding-update` command diffs plugin templates vs project agent files, preserves model assignments, offers per-file accept/reject.
 - Agent templates include `# plugin-version: N` header for staleness detection.
 
 ### Phase C: Guides
@@ -262,7 +262,7 @@ Test in:
 For each project:
 
 - Install/use plugin skill set.
-- Run `/init`.
+- Run `/zooplankton-coding-init`.
 - Run one end-to-end orchestrate cycle on a small task.
 - Validate reviewer flow, cleanup behavior, and retrospective outputs.
 
@@ -280,14 +280,14 @@ Distribution uses the OpenCode plugin system:
 - **`package.json`** has `"type": "module"` and `"main": ".opencode/plugins/opencode-plugin-coding.js"`.
 - **No symlinks** needed in consumer projects.
 - **Self-hosting**: The plugin repo itself loads the plugin from `.opencode/plugins/` (auto-discovered by OpenCode).
-- **Agent files** (`.opencode/agents/*.md`) are still per-project. `/init` generates them from templates.
+- **Agent files** (`.opencode/agents/*.md`) are still per-project. `/zooplankton-coding-init` generates them from templates.
 
 ## 12) Acceptance Criteria (v1)
 
 The plugin v1 is considered ready when:
 
 1. All 7 skills and 4 guides are fully implemented with usable instructions.
-2. `/init` reliably generates valid `workflow.json` in all 3 target repos.
+2. `/zooplankton-coding-init` reliably generates valid `workflow.json` in all 3 target repos.
 3. Orchestrate flow executes end-to-end with:
    - plan file on disk before coding,
    - core + normal reviewer parallel run,

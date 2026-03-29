@@ -2,9 +2,9 @@
 description: Auto-detect project settings, generate workflow.json, and create agent files for the coding plugin.
 ---
 
-# /init — Project Setup
+# /zooplankton-coding-init — Project Setup
 
-When the user runs `/init`, perform the following steps to bootstrap the opencode-plugin-coding configuration for this project.
+When the user runs `/zooplankton-coding-init`, perform the following steps to bootstrap the opencode-plugin-coding configuration for this project.
 
 ## Step 1: Auto-Detect Project Settings
 
@@ -178,7 +178,7 @@ mkdir -p .opencode/agents
 After setup, print a summary:
 
 ```
-## /init Complete
+## /zooplankton-coding-init Complete
 
 **Project:** <name>
 **Repo:** <repo>
@@ -209,5 +209,5 @@ After setup, print a summary:
 - [ ] Set `reviewFocus` entries if this project has specific review emphases
 - [ ] Review `docsToRead` list and add any project-specific docs
 
-> **Tip:** When the plugin is updated, run `/update` to sync agent file templates while preserving your model assignments.
+> **Tip:** When the plugin is updated, run `/zooplankton-coding-update` to sync agent file templates while preserving your model assignments.
 ```

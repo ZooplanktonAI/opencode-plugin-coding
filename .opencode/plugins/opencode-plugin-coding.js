@@ -55,7 +55,7 @@ const loadCommands = () => {
   return commands;
 };
 
-export const CodingPlugin = async ({ directory }) => {
+export const ZooplanktonCodingPlugin = async ({ directory }) => {
   const skillsDir = path.join(pluginRoot, "skills");
 
   return {

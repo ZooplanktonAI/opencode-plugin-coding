@@ -54,7 +54,7 @@ ls .worktrees/core-reviewer-2 2>/dev/null || git worktree add --detach .worktree
 
 Read `agents.coreCoder` and `agents.coreReviewers` from `workflow.json`. Create a worktree at `.worktrees/<name>` for each.
 
-`.worktrees/` must be in `.gitignore`. The `/init` command handles this automatically.
+`.worktrees/` must be in `.gitignore`. The `/zooplankton-coding-init` command handles this automatically.
 
 ---
 
@@ -79,7 +79,7 @@ If the change is < 20 lines, straightforward, and low-risk, skip Phases 1–2:
 1. Read `.opencode/workflow.json`, `AGENTS.md`, and all `docsToRead` files
 2. Run cleanup policy (see Cleanup Policy section below)
 3. Check for stale plans and report alerts
-4. **Version check:** For each agent in workflow.json, read `.opencode/agents/<name>.md` and compare the `# plugin-version: N` line against the corresponding template in `templates/agents/`. If any project agent files have a lower version than the template, emit a one-line warning: `"⚠ Agent templates have been updated. Run /update to sync."` — then continue (non-blocking).
+4. **Version check:** For each agent in workflow.json, read `.opencode/agents/<name>.md` and compare the `# plugin-version: N` line against the corresponding template in `templates/agents/`. If any project agent files have a lower version than the template, emit a one-line warning: `"⚠ Agent templates have been updated. Run /zooplankton-coding-update to sync."` — then continue (non-blocking).
 5. Verify worktrees exist (create if missing)
 6. If a plan file exists at `.opencode/plans/<branch>.md`, read it. Otherwise, invoke `@<coreCoder>` to produce a plan first (see Phase 2 planning step).
 

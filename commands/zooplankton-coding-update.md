@@ -2,9 +2,9 @@
 description: Sync agent files with the latest plugin templates while preserving model assignments.
 ---
 
-# /update — Sync Agent Templates
+# /zooplankton-coding-update — Sync Agent Templates
 
-When the user runs `/update`, compare the plugin's agent templates against the project's agent files and offer to update them.
+When the user runs `/zooplankton-coding-update`, compare the plugin's agent templates against the project's agent files and offer to update them.
 
 ## Step 1: Identify Agent Files
 
@@ -29,7 +29,7 @@ Extract the `# plugin-version: N` line from both files. Compare:
 | Same | Same | Skip — up to date |
 | Higher | Lower | Offer update |
 | — | Missing | Project file has no version line — treat as outdated |
-| — | File doesn't exist | Offer to create (same as `/init` would) |
+| — | File doesn't exist | Offer to create (same as `/zooplankton-coding-init` would) |
 
 ## Step 3: Show Diff for Each Outdated File
 
@@ -70,13 +70,13 @@ For each file the user rejects:
 If workflow.json lists agent names that have no corresponding `.opencode/agents/<name>.md` file:
 
 1. List the missing agents
-2. Ask the user for model assignments (or use defaults from `/init`)
+2. Ask the user for model assignments (or use defaults from `/zooplankton-coding-init`)
 3. Generate the files from templates
 
 ## Step 6: Print Summary
 
 ```
-## /update Complete
+## /zooplankton-coding-update Complete
 
 **Updated:** <count> agent files
 **Skipped:** <count> (user declined or already up to date)

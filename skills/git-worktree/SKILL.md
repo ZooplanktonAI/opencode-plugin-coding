@@ -44,7 +44,7 @@ ls .worktrees/<name> 2>/dev/null || git worktree add --detach .worktrees/<name>
 
 ### Ensure .gitignore entry
 
-`.worktrees/` must be in `.gitignore`. The `/init` command handles this automatically.
+`.worktrees/` must be in `.gitignore`. The `/zooplankton-coding-init` command handles this automatically.
 
 ### Install dependencies (if needed)
 

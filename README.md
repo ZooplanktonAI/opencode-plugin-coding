@@ -18,8 +18,8 @@ A shared [OpenCode](https://opencode.ai) plugin for multi-agent software develop
 
 | Command | Description |
 |---------|-------------|
-| `/init` | Auto-detect project, generate `workflow.json` and agent files |
-| `/update` | Sync agent files with latest plugin templates (preserves model assignments) |
+| `/zooplankton-coding-init` | Auto-detect project, generate `workflow.json` and agent files |
+| `/zooplankton-coding-update` | Sync agent files with latest plugin templates (preserves model assignments) |
 
 ## Agent Templates
 
@@ -56,14 +56,14 @@ Add the plugin to your project's `opencode.json`:
 
 OpenCode will auto-install the plugin via Bun at startup. The plugin registers all skills and commands automatically — no symlinks or manual copies needed.
 
-> **How it works:** The plugin uses OpenCode's `config` hook to add its `skills/` directory to the skill discovery paths and register `/init` and `/update` commands from its `commands/` directory.
+> **How it works:** The plugin uses OpenCode's `config` hook to add its `skills/` directory to the skill discovery paths and register `/zooplankton-coding-init` and `/zooplankton-coding-update` commands from its `commands/` directory.
 
-### 2. Run /init
+### 2. Run /zooplankton-coding-init
 
 From your project root in OpenCode, run:
 
 ```
-/init
+/zooplankton-coding-init
 ```
 
 This will:
@@ -81,14 +81,14 @@ Review the generated agent files in `.opencode/agents/`. Each file is generated 
 When the plugin updates its agent templates, run:
 
 ```
-/update
+/zooplankton-coding-update
 ```
 
 This diffs the plugin templates against your project's agent files, preserves your model assignments, and lets you accept or reject each change.
 
 ## Project-Level Files
 
-After `/init`, your project will have:
+After `/zooplankton-coding-init`, your project will have:
 
 | File | Committed? | Purpose |
 |------|-----------|---------|
