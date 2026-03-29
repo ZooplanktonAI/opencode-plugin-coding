@@ -17,7 +17,7 @@
     "typecheck": ""
   },
   "agents": {
-    "coreCoder": { "model": "" },
+    "coreCoder": { "name": "core-coder", "model": "" },
     "coreReviewers": [
       { "name": "core-reviewer-primary", "model": "" },
       { "name": "core-reviewer-secondary", "model": "" }
@@ -25,7 +25,7 @@
     "reviewers": [
       { "name": "reviewer-1", "model": "" }
     ],
-    "securityReviewer": { "enabled": false }
+    "securityReviewers": []
   },
   "tdd": { "enabled": false },
   "docsToRead": [],

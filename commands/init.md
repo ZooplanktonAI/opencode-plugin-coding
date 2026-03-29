@@ -44,7 +44,7 @@ Use these defaults (user can adjust later):
 
 ```json
 {
-  "coreCoder": { "model": "github-copilot/claude-opus-4.6" },
+  "coreCoder": { "name": "core-coder", "model": "github-copilot/claude-opus-4.6" },
   "coreReviewers": [
     { "name": "core-reviewer-primary", "model": "github-copilot/claude-sonnet-4.6" },
     { "name": "core-reviewer-secondary", "model": "github-copilot/gpt-5.4" }
@@ -57,7 +57,7 @@ Use these defaults (user can adjust later):
     { "name": "reviewer-ark", "model": "volcengine-plan/ark-code-latest" },
     { "name": "reviewer-deepseek", "model": "volcengine-plan/deepseek-v3.2" }
   ],
-  "securityReviewer": { "enabled": false }
+  "securityReviewers": []
 }
 ```
 
@@ -95,7 +95,7 @@ Create `.opencode/workflow.json` with the detected settings. Use the template st
     "typecheck": "<detected>"
   },
   "agents": {
-    "coreCoder": { "model": "github-copilot/claude-opus-4.6" },
+    "coreCoder": { "name": "core-coder", "model": "github-copilot/claude-opus-4.6" },
     "coreReviewers": [
       { "name": "core-reviewer-primary", "model": "github-copilot/claude-sonnet-4.6" },
       { "name": "core-reviewer-secondary", "model": "github-copilot/gpt-5.4" }
@@ -108,7 +108,7 @@ Create `.opencode/workflow.json` with the detected settings. Use the template st
       { "name": "reviewer-ark", "model": "volcengine-plan/ark-code-latest" },
       { "name": "reviewer-deepseek", "model": "volcengine-plan/deepseek-v3.2" }
     ],
-    "securityReviewer": { "enabled": false }
+    "securityReviewers": []
   },
   "tdd": { "enabled": false },
   "docsToRead": ["<detected>"],
@@ -170,7 +170,7 @@ After setup, print a summary:
 - [ ] Verify detected commands are correct in `.opencode/workflow.json`
 - [ ] Verify reviewer names and model IDs in `agents.coreReviewers` and `agents.reviewers`
 - [ ] Add or remove reviewer entries to match your available agent files
-- [ ] Enable `securityReviewer` if needed
+- [ ] Add entries to `agents.securityReviewers` if needed
 - [ ] Enable `tdd` if using test-driven development
 - [ ] Set `reviewFocus` if this project has a specific review emphasis
 - [ ] Review `docsToRead` list and add any project-specific docs

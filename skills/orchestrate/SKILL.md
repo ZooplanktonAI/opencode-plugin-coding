@@ -7,7 +7,7 @@ description: Full multi-agent software development workflow — implement, revie
 
 The central orchestration skill. You (the Build agent) coordinate the full software development lifecycle: plan → implement → review → merge → retrospect.
 
-You dispatch subagents (`@core-coder`, `@core-reviewer-*`, `@reviewer-*`, optionally `@security-reviewer`) and manage the flow between them. All project-specific settings come from `.opencode/workflow.json`.
+You dispatch subagents (`@<coreCoder.name>`, `@<coreReviewers[].name>`, `@<reviewers[].name>`, optionally `@<securityReviewers[].name>`) and manage the flow between them. All project-specific settings come from `.opencode/workflow.json`.
 
 Consolidates the best patterns from app-annie (template-driven), admin (non-blocking reviewer wait), and stone-guardian (reviewer scoring, conciseness rules, JSON heredoc posting).
 
@@ -29,9 +29,10 @@ Read `.opencode/workflow.json` at the start of every orchestration. Key fields:
 - `project.repo` — GitHub repo (e.g. `Org/repo-name`). Hardcode in all `gh` commands.
 - `project.defaultBranch` — typically `main` or `master`
 - `commands.*` — verification commands (typecheck, lint, test, build)
+- `agents.coreCoder` — `{ name, model }` for the core implementation agent
 - `agents.coreReviewers` — array of `{ name, model }` for core reviewers (blocking quorum)
 - `agents.reviewers` — array of `{ name, model }` for normal reviewers (non-blocking)
-- `agents.securityReviewer.enabled` — whether to run pre-merge security review
+- `agents.securityReviewers` — array of `{ name, model }` for security reviewers (empty = disabled)
 - `docsToRead` — files all agents must read before working
 - `reviewFocus` — project-specific review emphasis (passed to reviewers)
 
@@ -51,7 +52,7 @@ ls .worktrees/core-reviewer-primary 2>/dev/null || git worktree add --detach .wo
 ls .worktrees/core-reviewer-secondary 2>/dev/null || git worktree add --detach .worktrees/core-reviewer-secondary
 ```
 
-Read `agents.coreReviewers` from `workflow.json` and create a worktree at `.worktrees/<entry.name>` for each entry.
+Read `agents.coreCoder.name` and `agents.coreReviewers` from `workflow.json`. Create a worktree at `.worktrees/<name>` for the core coder and each core reviewer entry.
 
 `.worktrees/` must be in `.gitignore`. The `/init` command handles this automatically.
 
@@ -67,7 +68,7 @@ If the change is < 20 lines, straightforward, and low-risk, skip Phases 1–2:
 4. `gh pr create`
 5. Run Phase 3 (all reviewers in parallel)
 6. Run Phase 4 (evaluate)
-   - Blocking issues → hand off to `@core-coder`; continue review loop
+   - Blocking issues → hand off to `@<coreCoder.name>`; continue review loop
    - Advisory-only → orchestrator addresses directly
 7. Post pre-merge summary → ask user to approve → merge
 
@@ -79,7 +80,7 @@ If the change is < 20 lines, straightforward, and low-risk, skip Phases 1–2:
 2. Run cleanup policy (see Cleanup Policy section below)
 3. Check for stale plans and report alerts
 4. Verify worktrees exist (create if missing)
-5. If a plan file exists at `.opencode/plans/<branch>.md`, read it. Otherwise, invoke `@core-coder` to produce a plan first (see Phase 2 planning step).
+5. If a plan file exists at `.opencode/plans/<branch>.md`, read it. Otherwise, invoke `@<coreCoder.name>` to produce a plan first (see Phase 2 planning step).
 
 ---
 
@@ -87,17 +88,17 @@ If the change is < 20 lines, straightforward, and low-risk, skip Phases 1–2:
 
 ### 2a. Planning (if no plan exists)
 
-Invoke `@core-coder` with the planning template (see Invocation Templates). It must return a structured plan — files to change, approach, risks, scope. **No implementation yet.**
+Invoke `@<coreCoder.name>` with the planning template (see Invocation Templates). It must return a structured plan — files to change, approach, risks, scope. **No implementation yet.**
 
-Present the plan to the user for approval. If user requests changes, re-invoke `@core-coder` with feedback.
+Present the plan to the user for approval. If user requests changes, re-invoke `@<coreCoder.name>` with feedback.
 
 Write the approved plan to `.opencode/plans/<branch>.md` and set status to `not_started`.
 
 ### 2b. Implementation
 
 1. Set plan status to `in_progress`
-2. Invoke `@core-coder` with the implementation template
-3. Core-coder must work in `.worktrees/core-coder`, create a feature branch from `origin/<defaultBranch>`, implement, run all verification commands, commit, push, and create a PR
+2. Invoke `@<coreCoder.name>` with the implementation template
+3. Core-coder must work in `.worktrees/<coreCoder.name>`, create a feature branch from `origin/<defaultBranch>`, implement, run all verification commands, commit, push, and create a PR
 4. Core-coder returns: **PR number, PR URL, branch name**
 5. Record these for Phase 3
 
@@ -105,13 +106,13 @@ Write the approved plan to `.opencode/plans/<branch>.md` and set status to `not_
 
 ## Phase 3: Review
 
-### 3a. Security Review (if enabled)
+### 3a. Security Review (if configured)
 
-If `workflow.json` → `agents.securityReviewer.enabled` is `true`:
+If `workflow.json` → `agents.securityReviewers` is non-empty:
 
-1. Invoke `@security-reviewer` with the PR number (see `guides/security-reviewer-guide.md`)
-2. If verdict is **BLOCK**: send critical/high findings to `@core-coder` for fixes before proceeding
-3. If verdict is **PASS**: continue to 3b
+1. Invoke each `@<entry.name>` in `agents.securityReviewers` with the PR number (see `guides/security-reviewer-guide.md`)
+2. If any verdict is **BLOCK**: send critical/high findings to `@<coreCoder.name>` for fixes before proceeding
+3. If all verdicts are **PASS**: continue to 3b
 
 ### 3b. Parallel Code Review
 
@@ -148,9 +149,9 @@ Count unique blocking and advisory issues across all reviewers.
 | Condition | Action |
 |-----------|--------|
 | No issues at all | Post pre-merge summary → ask user → merge |
-| Blocking issues exist, round < 3 | Increment round; send all feedback to `@core-coder`; if new round = 3 add final-round signal; go to Phase 3 |
-| Advisory-only (no blocking), round < 3 | **Always final round.** Increment round; send advisories to `@core-coder` with final-round signal; go to Phase 3 |
-| Round >= 3 | Stop. If previous round was blocking (not advisory-only), send final-round signal to `@core-coder` for TODO.md. Post pre-merge summary → ask user whether to merge or handle manually |
+| Blocking issues exist, round < 3 | Increment round; send all feedback to `@<coreCoder.name>`; if new round = 3 add final-round signal; go to Phase 3 |
+| Advisory-only (no blocking), round < 3 | **Always final round.** Increment round; send advisories to `@<coreCoder.name>` with final-round signal; go to Phase 3 |
+| Round >= 3 | Stop. If previous round was blocking (not advisory-only), send final-round signal to `@<coreCoder.name>` for TODO.md. Post pre-merge summary → ask user whether to merge or handle manually |
 
 **Critical rules:**
 - **Never merge without explicit user confirmation.**
@@ -158,7 +159,7 @@ Count unique blocking and advisory issues across all reviewers.
 
 ### Address Feedback
 
-When sending feedback to `@core-coder`, use the revision template (see Invocation Templates). Core-coder must:
+When sending feedback to `@<coreCoder.name>`, use the revision template (see Invocation Templates). Core-coder must:
 
 1. Fix all blocking issues
 2. Address advisory issues at discretion (justify skips)
@@ -268,7 +269,7 @@ Do NOT implement — planning only.
 ### Core-coder: Implementation
 
 ```
-Implement the approved plan in .worktrees/core-coder.
+Implement the approved plan in .worktrees/<coreCoder.name>.
 
 Plan:
 <approved plan>
@@ -398,8 +399,8 @@ After the user approves, merge and clean up:
 BRANCH=$(gh pr view $PR_NUMBER --json headRefName -q ".headRefName")
 gh pr merge $PR_NUMBER --squash --admin --repo <REPO>
 git checkout <defaultBranch> && git pull --ff-only origin <defaultBranch>
-# Detach all worktrees (core-coder + each core reviewer from agents.coreReviewers)
-git -C .worktrees/core-coder checkout --detach HEAD
+# Detach all worktrees (coreCoder + each core reviewer from agents.coreReviewers)
+git -C .worktrees/<coreCoder.name> checkout --detach HEAD
 # For each entry in agents.coreReviewers:
 git -C .worktrees/<entry.name> checkout --detach HEAD
 git branch -D $BRANCH

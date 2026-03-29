@@ -86,7 +86,7 @@ After `/init`, your project will have:
     "typecheck": "npx tsc --noEmit"
   },
   "agents": {
-    "coreCoder": { "model": "github-copilot/claude-opus-4.6" },
+    "coreCoder": { "name": "core-coder", "model": "github-copilot/claude-opus-4.6" },
     "coreReviewers": [
       { "name": "core-reviewer-primary", "model": "github-copilot/claude-sonnet-4.6" },
       { "name": "core-reviewer-secondary", "model": "github-copilot/gpt-5.4" }
@@ -99,7 +99,7 @@ After `/init`, your project will have:
       { "name": "reviewer-ark", "model": "volcengine-plan/ark-code-latest" },
       { "name": "reviewer-deepseek", "model": "volcengine-plan/deepseek-v3.2" }
     ],
-    "securityReviewer": { "enabled": false }
+    "securityReviewers": []
   },
   "tdd": { "enabled": false },
   "docsToRead": ["AGENTS.md"],

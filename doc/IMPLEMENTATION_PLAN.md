@@ -121,9 +121,9 @@ Canonical areas are plugin-defined:
 
 ## 7) Security Review (v1)
 
-- Dedicated security reviewer is optional (`enabled: true/false`).
+- Dedicated security reviewers are optional (empty `securityReviewers` array = disabled).
 - Only supported timing in v1: **pre-merge**.
-- Security reviewer runs before other reviewer rounds and can block progression on critical findings.
+- Security reviewers run before other reviewer rounds and can block progression on critical findings.
 - Security checklist and severity taxonomy live in `guides/security-reviewer-guide.md`.
 
 ## 8) Orchestrate Flow (5 Phases)
@@ -195,7 +195,7 @@ Target structure:
     "typecheck": ""
   },
   "agents": {
-    "coreCoder": { "model": "" },
+    "coreCoder": { "name": "core-coder", "model": "" },
     "coreReviewers": [
       { "name": "core-reviewer-primary", "model": "" },
       { "name": "core-reviewer-secondary", "model": "" }
@@ -203,7 +203,7 @@ Target structure:
     "reviewers": [
       { "name": "reviewer-1", "model": "" }
     ],
-    "securityReviewer": { "enabled": false }
+    "securityReviewers": []
   },
   "tdd": { "enabled": false },
   "docsToRead": [],
