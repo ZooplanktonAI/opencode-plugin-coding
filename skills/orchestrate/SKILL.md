@@ -7,7 +7,7 @@ description: Full multi-agent software development workflow — implement, revie
 
 The central orchestration skill. You coordinate the full software development lifecycle: plan → implement → review → merge → retrospect.
 
-You dispatch subagents (`@<coreCoder>`, `@<coreReviewers[i]>`, `@<reviewers[i]>`, optionally `@<securityReviewers[i]>`) and manage the flow between them. All project-specific settings come from `.opencode/workflow.json`. Agent models and permissions are defined in `.opencode/agents/<name>.md` files.
+You dispatch subagents (`@<coreCoder>`, `@<coreReviewers[i]>`, `@<reviewers[i]>`, optionally `@<securityReviewers[i]>`) and manage the flow between them. All project-specific settings come from `.opencode/workflow.json`. Agents are dynamically registered by the plugin from workflow.json — models come from `{ name, model }` objects in the agents section, permissions and prompts from the guide files.
 
 Consolidates the best patterns from app-annie (template-driven), admin (non-blocking reviewer wait), and stone-guardian (reviewer scoring, conciseness rules, JSON heredoc posting).
 
@@ -29,10 +29,10 @@ Read `.opencode/workflow.json` at the start of every orchestration. Key fields:
 - `project.repo` — GitHub repo (e.g. `Org/repo-name`). Hardcode in all `gh` commands.
 - `project.defaultBranch` — typically `main` or `master`
 - `commands.*` — verification commands (typecheck, lint, test, build)
-- `agents.coreCoder` — agent name (string) for the core implementation agent
-- `agents.coreReviewers` — array of agent names for core reviewers (blocking quorum)
-- `agents.reviewers` — array of agent names for normal reviewers (non-blocking)
-- `agents.securityReviewers` — array of agent names for security reviewers (empty = disabled)
+- `agents.coreCoder` — `{ name, model }` object for the core implementation agent. Use `.name` as the agent name for `@<name>` invocations.
+- `agents.coreReviewers` — array of `{ name, model }` objects for core reviewers (blocking quorum)
+- `agents.reviewers` — array of `{ name, model }` objects for normal reviewers (non-blocking)
+- `agents.securityReviewers` — array of `{ name, model }` objects for security reviewers (empty array = disabled)
 - `docsToRead` — files all agents must read before working
 - `reviewFocus` — array of project-specific review emphasis strings (passed to reviewers)
 
@@ -52,7 +52,7 @@ ls .worktrees/core-reviewer-1 2>/dev/null || git worktree add --detach .worktree
 ls .worktrees/core-reviewer-2 2>/dev/null || git worktree add --detach .worktrees/core-reviewer-2
 ```
 
-Read `agents.coreCoder` and `agents.coreReviewers` from `workflow.json`. Create a worktree at `.worktrees/<name>` for each.
+Read `agents.coreCoder.name` and each `agents.coreReviewers[i].name` from `workflow.json`. Create a worktree at `.worktrees/<name>` for each.
 
 `.worktrees/` must be in `.gitignore`. The `/zooplankton-coding-init` command handles this automatically.
 
@@ -79,9 +79,8 @@ If the change is < 20 lines, straightforward, and low-risk, skip Phases 1–2:
 1. Read `.opencode/workflow.json`, `AGENTS.md`, and all `docsToRead` files
 2. Run cleanup policy (see Cleanup Policy section below)
 3. Check for stale plans and report alerts
-4. **Version check:** For each agent in workflow.json, read `.opencode/agents/<name>.md` and compare the `# plugin-version: N` line against the corresponding template in `templates/agents/`. If any project agent files have a lower version than the template, emit a one-line warning: `"⚠ Agent templates have been updated. Run /zooplankton-coding-update to sync."` — then continue (non-blocking).
-5. Verify worktrees exist (create if missing)
-6. If a plan file exists at `.opencode/plans/<branch>.md`, read it. Otherwise, invoke `@<coreCoder>` to produce a plan first (see Phase 2 planning step).
+4. Verify worktrees exist (create if missing)
+5. If a plan file exists at `.opencode/plans/<branch>.md`, read it. Otherwise, invoke `@<coreCoder>` to produce a plan first (see Phase 2 planning step).
 
 ---
 
@@ -111,16 +110,16 @@ Write the approved plan to `.opencode/plans/<branch>.md` and set status to `not_
 
 Invoke **all reviewers in a single parallel message** (one Task call per reviewer).
 
-Read `agents.coreReviewers` and `agents.reviewers` arrays from `workflow.json`. Each entry is an agent name string — invoke with `@<name>`.
+Read `agents.coreReviewers` and `agents.reviewers` arrays from `workflow.json`. Each entry is a `{ name, model }` object — use `.name` for `@<name>` invocations.
 
 **Core reviewers** (blocking quorum — must wait for all):
 
-For each name in `agents.coreReviewers`, invoke `@<name>`:
+For each entry in `agents.coreReviewers`, invoke `@<entry.name>`:
 - Assign worktree `.worktrees/<name>`
 
 **Normal reviewers** (non-blocking — include if available):
 
-For each name in `agents.reviewers`, invoke `@<name>`:
+For each entry in `agents.reviewers`, invoke `@<entry.name>`:
 - Assign 1-2 review areas via adaptive round-robin (see Reviewer Assignment Strategy)
 
 Each reviewer follows their respective guide (`guides/core-reviewer-guide.md` or `guides/reviewer-guide.md`).
@@ -133,7 +132,7 @@ This is the "admin-style" non-blocking wait — core reviewers form the quorum, 
 
 **Implementation rule (important):**
 - Do not block Phase 4 waiting for slow/stuck normal reviewers.
-- Dispatch normal reviewers independently, but only gate on `agents.coreReviewers` completion.
+- Dispatch normal reviewers independently, but only gate on `agents.coreReviewers` entries' completion.
 - If a normal reviewer task hangs/fails, retry once; if still unavailable, mark as no result for this round and continue.
 
 ---
@@ -230,7 +229,7 @@ Canonical areas (defined in plugin, NOT per-project config):
 
 1. **Baseline:** randomly assign 1–2 areas to each normal reviewer, ensuring all 6 areas are covered across the pool
 2. **Adaptation:** if `.opencode/reviewer-knowledge.json` exists, weight the assignment:
-   - Read per-model, per-area historical scores
+   - Read per-model, per-area historical scores (model IDs come from `workflow.json` → `agents` → `<entry>.model`)
    - Models with higher scores for an area are more likely to be assigned that area
    - Keep assignment **stochastic** (soft weighting) — not deterministic
 3. **Fallback:** if no knowledge file exists, use pure random round-robin
@@ -404,10 +403,10 @@ After the user approves, merge and clean up:
 BRANCH=$(gh pr view $PR_NUMBER --json headRefName -q ".headRefName")
 gh pr merge $PR_NUMBER --squash --admin --repo <REPO>
 git checkout <defaultBranch> && git pull --ff-only origin <defaultBranch>
-# Detach all worktrees (coreCoder + each name in agents.coreReviewers)
+# Detach all worktrees (coreCoder.name + each entry.name in agents.coreReviewers)
 git -C .worktrees/<coreCoder> checkout --detach HEAD
-# For each name in agents.coreReviewers:
-git -C .worktrees/<name> checkout --detach HEAD
+# For each entry in agents.coreReviewers:
+git -C .worktrees/<entry.name> checkout --detach HEAD
 git branch -D $BRANCH
 git push origin --delete $BRANCH 2>/dev/null || true
 git remote prune origin

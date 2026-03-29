@@ -1,7 +1,8 @@
 /**
  * opencode-plugin-coding — OpenCode plugin for multi-agent coding workflows.
  *
- * Registers skills and commands without symlinks.
+ * Registers skills, commands, and agents dynamically via the config hook.
+ * Agents are registered from workflow.json + guide files — no .opencode/agents/*.md needed.
  * Install: add to "plugin" array in opencode.json (global or project).
  */
 
@@ -48,18 +49,144 @@ const loadCommands = () => {
       description: meta.description || `Run /${name}`,
       template: body.trim(),
     };
-    // Forward optional fields if present
     if (meta.agent) commands[name].agent = meta.agent;
     if (meta.model) commands[name].model = meta.model;
   }
   return commands;
 };
 
+// Read a guide file and return its content as a prompt string
+const readGuide = (filename) => {
+  const guidePath = path.join(pluginRoot, "guides", filename);
+  if (!fs.existsSync(guidePath)) return "";
+  return fs.readFileSync(guidePath, "utf8").trim();
+};
+
+// Read workflow.json from the project directory
+const readWorkflowJson = (directory) => {
+  const workflowPath = path.join(directory, ".opencode", "workflow.json");
+  if (!fs.existsSync(workflowPath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(workflowPath, "utf8"));
+  } catch {
+    return null;
+  }
+};
+
+// Agent role definitions: guide file, description, and permissions
+const AGENT_ROLES = {
+  coreCoder: {
+    guide: "core-coder-guide.md",
+    description:
+      "Core implementation agent — executes plans, writes code, runs verification, creates PRs.",
+    permission: {
+      edit: "allow",
+      bash: { "*": "allow" },
+      read: "allow",
+      webfetch: "allow",
+    },
+  },
+  coreReviewer: {
+    guide: "core-reviewer-guide.md",
+    description:
+      "Core code reviewer (blocking) — full verification in worktree, reviews all areas.",
+    permission: {
+      edit: "deny",
+      bash: { "*": "allow" },
+      read: "allow",
+      webfetch: "deny",
+    },
+  },
+  reviewer: {
+    guide: "reviewer-guide.md",
+    description:
+      "Code reviewer (non-blocking) — diff-based review on assigned areas.",
+    permission: {
+      edit: "deny",
+      bash: {
+        "*": "deny",
+        "gh api *": "allow",
+        "gh pr diff *": "allow",
+        "gh pr view *": "allow",
+        "gh pr checks *": "allow",
+      },
+      read: "allow",
+      webfetch: "deny",
+    },
+  },
+  securityReviewer: {
+    guide: "security-reviewer-guide.md",
+    description: "Security reviewer — pre-merge security analysis.",
+    permission: {
+      edit: "deny",
+      bash: {
+        "*": "deny",
+        "gh api *": "allow",
+        "gh pr diff *": "allow",
+        "gh pr view *": "allow",
+        "gh pr checks *": "allow",
+      },
+      read: "allow",
+      webfetch: "deny",
+    },
+  },
+};
+
+// Map workflow.json agent fields to their role key
+const FIELD_TO_ROLE = {
+  coreCoder: "coreCoder",
+  coreReviewers: "coreReviewer",
+  reviewers: "reviewer",
+  securityReviewers: "securityReviewer",
+};
+
+// Register agents from workflow.json into cfg.agent
+const registerAgents = (config, directory) => {
+  const workflow = readWorkflowJson(directory);
+  if (!workflow?.agents) return;
+
+  config.agent = config.agent || {};
+
+  for (const [field, roleKey] of Object.entries(FIELD_TO_ROLE)) {
+    const role = AGENT_ROLES[roleKey];
+    const prompt = readGuide(role.guide);
+    const entries = workflow.agents[field];
+    if (!entries) continue;
+
+    // Normalize: coreCoder is a single object, others are arrays
+    const agentList = Array.isArray(entries) ? entries : [entries];
+
+    for (const agent of agentList) {
+      // Support both { name, model } objects and bare strings (backward compat)
+      const name = typeof agent === "string" ? agent : agent.name;
+      const model = typeof agent === "string" ? undefined : agent.model;
+
+      if (!name) continue;
+
+      // Don't override user-defined agents
+      if (config.agent[name]) continue;
+
+      const agentConfig = {
+        description: role.description,
+        mode: "subagent",
+        prompt,
+        permission: role.permission,
+      };
+
+      // Only set model if explicitly provided (non-empty)
+      if (model) {
+        agentConfig.model = model;
+      }
+
+      config.agent[name] = agentConfig;
+    }
+  }
+};
+
 export const ZooplanktonCodingPlugin = async ({ directory }) => {
   const skillsDir = path.join(pluginRoot, "skills");
 
   return {
-    // Register skills path and commands into live config
     config: async (config) => {
       // Skills — add our skills/ directory to discovery paths
       config.skills = config.skills || {};
@@ -72,11 +199,13 @@ export const ZooplanktonCodingPlugin = async ({ directory }) => {
       config.command = config.command || {};
       const pluginCommands = loadCommands();
       for (const [name, cmd] of Object.entries(pluginCommands)) {
-        // Don't override user-defined commands
         if (!config.command[name]) {
           config.command[name] = cmd;
         }
       }
+
+      // Agents — register from workflow.json + guide files
+      registerAgents(config, directory);
     },
   };
 };

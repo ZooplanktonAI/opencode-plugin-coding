@@ -5,7 +5,7 @@ description: Create and manage isolated git worktrees for parallel development. 
 
 # Git Worktree
 
-Manage isolated git worktrees for the multi-agent workflow. Each agent works in its own worktree to avoid conflicts. Read agent names from `workflow.json` → `agents`.
+Manage isolated git worktrees for the multi-agent workflow. Each agent works in its own worktree to avoid conflicts. Read agent names from `workflow.json` → `agents` (each entry is a `{ name, model }` object — use `.name` for paths).
 
 ---
 
@@ -21,8 +21,8 @@ Manage isolated git worktrees for the multi-agent workflow. Each agent works in 
 
 | Agent | Path | Purpose |
 |-------|------|---------|
-| `coreCoder` | `.worktrees/<coreCoder>` | Implementation workspace |
-| Each name in `coreReviewers` | `.worktrees/<name>` | Code review with full verification |
+| `coreCoder` | `.worktrees/<coreCoder.name>` | Implementation workspace |
+| Each entry in `coreReviewers` | `.worktrees/<entry.name>` | Code review with full verification |
 
 Normal reviewers do **not** need worktrees — they use `gh pr diff` (read-only).
 
@@ -32,14 +32,14 @@ Normal reviewers do **not** need worktrees — they use `gh pr diff` (read-only)
 
 ### Create worktrees (idempotent)
 
-Read `agents.coreCoder` and `agents.coreReviewers` from `workflow.json`. For each, create a worktree if it doesn't exist:
+Read `agents.coreCoder.name` and each `agents.coreReviewers[i].name` from `workflow.json`. For each, create a worktree if it doesn't exist:
 
 ```bash
-# For coreCoder:
-ls .worktrees/<coreCoder> 2>/dev/null || git worktree add --detach .worktrees/<coreCoder>
+# For coreCoder.name:
+ls .worktrees/<coreCoder.name> 2>/dev/null || git worktree add --detach .worktrees/<coreCoder.name>
 
-# For each name in coreReviewers:
-ls .worktrees/<name> 2>/dev/null || git worktree add --detach .worktrees/<name>
+# For each entry in coreReviewers:
+ls .worktrees/<entry.name> 2>/dev/null || git worktree add --detach .worktrees/<entry.name>
 ```
 
 ### Ensure .gitignore entry
@@ -97,11 +97,11 @@ git checkout --detach origin/<pr-branch>
 Detach all worktrees so the feature branch can be deleted:
 
 ```bash
-# For coreCoder:
-git -C .worktrees/<coreCoder> checkout --detach HEAD
+# For coreCoder.name:
+git -C .worktrees/<coreCoder.name> checkout --detach HEAD
 
-# For each name in coreReviewers:
-git -C .worktrees/<name> checkout --detach HEAD
+# For each entry in coreReviewers:
+git -C .worktrees/<entry.name> checkout --detach HEAD
 ```
 
 Then delete the branch locally and remotely (handled by the `orchestrate` skill).

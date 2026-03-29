@@ -4,7 +4,7 @@ Project knowledge base for agents working on this repository.
 
 ## What This Repo Is
 
-A shared OpenCode plugin that provides multi-agent software development workflows (brainstorm, plan, orchestrate, review, debug) for ZooplanktonAI projects. It is NOT an application — it contains markdown skills, guides, agent templates, and a JS plugin entry point.
+A shared OpenCode plugin that provides multi-agent software development workflows (brainstorm, plan, orchestrate, review, debug) for ZooplanktonAI projects. It is NOT an application — it contains markdown skills, guides, and a JS plugin entry point that dynamically registers agents.
 
 ## Repository Structure
 
@@ -12,7 +12,6 @@ A shared OpenCode plugin that provides multi-agent software development workflow
 opencode-plugin-coding/
 ├── .opencode/
 │   ├── plugins/opencode-plugin-coding.js   # Plugin entry point (config hook)
-│   ├── agents/*.md                         # Self-hosted agent files (for developing this repo)
 │   └── workflow.json                       # Self-hosted workflow config
 ├── commands/
 │   ├── zooplankton-coding-init.md          # /zooplankton-coding-init command
@@ -31,7 +30,6 @@ opencode-plugin-coding/
 │   ├── git-worktree/SKILL.md              # Worktree management
 │   └── playwright/SKILL.md                # MCP-based browser automation
 ├── templates/
-│   ├── agents/                             # 4 agent templates with $MODEL placeholder
 │   ├── workflow.json                       # Template for /zooplankton-coding-init
 │   ├── plan.md                             # Plan file template
 │   └── retrospective.md                    # Retrospective template
@@ -52,17 +50,21 @@ All content files are markdown (`.md`). The only JS file is the plugin entry poi
 
 - **Config fields:** camelCase (`coreCoder`, `coreReviewers`, `testDrivenDevelopment`, `reviewFocus`)
 - **Agent names:** kebab-case with numeric suffix (`core-coder`, `core-reviewer-1`, `reviewer-3`)
-- **Agent names are model-agnostic:** Never put model names in agent filenames. Model is defined only in the agent `.md` frontmatter.
+- **Agent names are model-agnostic:** Never put model names in agent names. Model is defined only in `workflow.json` → `agents` → `{ name, model }`.
 - **Command names:** prefixed with `zooplankton-coding-` to avoid colliding with OpenCode built-ins
 
-### Agent templates
+### Agent architecture
 
-4 templates in `templates/agents/`. Each has:
-- `# plugin-version: N` as a YAML comment inside the frontmatter (for update tracking)
-- `$MODEL` placeholder in YAML frontmatter (replaced during `/zooplankton-coding-init`)
-- Full permission block matching what the source repos use
+Agents are **dynamically registered** by the plugin JS via OpenCode's `config.agent` API. There are no `.opencode/agents/*.md` files in consumer projects. The plugin reads:
 
-When modifying templates, always bump the `plugin-version` number.
+1. **workflow.json** → `agents` section for `{ name, model }` definitions
+2. **guides/*.md** for prompt content (used as the agent's `prompt` field)
+3. **Hardcoded permission maps** in the plugin JS (matching the source of truth table below)
+
+This means:
+- To add/remove agents or change models, edit `workflow.json` and restart OpenCode
+- Guide changes take effect immediately (no per-project files to update)
+- Permissions are controlled centrally in the plugin
 
 ### Agent permissions (source of truth)
 
@@ -80,27 +82,27 @@ Normal/security reviewer `gh` allowlist: `gh api *`, `gh pr diff *`, `gh pr view
 The plugin uses OpenCode's `config` hook (undocumented but confirmed in OpenCode source) to:
 1. Add `skills/` to `config.skills.paths` for skill discovery
 2. Register commands from `commands/*.md` into `config.command`
+3. Register agents from `workflow.json` + `guides/*.md` into `config.agent`
 
 No symlinks are used. Consumer projects install via `"plugin"` array in `opencode.json`.
 
 ### workflow.json
 
-Each consumer project has `.opencode/workflow.json` with project-specific settings. The `agents` section stores **names only** (strings), not `{ name, model }` objects. Agent `.md` files are the single source of truth for model, permissions, and prompt.
+Each consumer project has `.opencode/workflow.json` with project-specific settings. The `agents` section stores `{ name, model }` objects. The plugin reads these to dynamically register agents with the correct model, permissions (from role), and prompt (from guide file).
 
 ## Gotchas
 
 - **`package.json` main** points to `.opencode/plugins/opencode-plugin-coding.js` — this is intentional for the plugin system, not a mistake.
-- **Self-hosted agent files** in `.opencode/agents/` are real instantiated agents for developing this repo (not templates). They have actual model IDs, not `$MODEL`.
 - **The orchestrate skill is the largest file** (~430 lines). When editing, be careful with the phase structure. Use targeted edits, not full rewrites.
 - **`.opencode/reviewer-knowledge.json`** is gitignored and ephemeral. Accept loss on fresh clone.
 - **Plan/retrospective files** are gitignored. Only completed plans >7 days old are auto-deleted; stale non-completed plans trigger alerts.
-- **The `# plugin-version: N` line must be a YAML comment inside the frontmatter** (between the `---` delimiters). Placing it before the opening `---` breaks frontmatter parsing.
 - **Use `<<'EOF'` (single-quoted)** in heredocs within skill/guide bash examples to prevent shell variable expansion inside JSON.
+- **No agent `.md` files in consumer projects** — agents are registered dynamically. If you see references to `.opencode/agents/*.md` in consumer projects, those are stale artifacts from before the architecture change.
 
 ## Review Focus
 
 When reviewing changes to this repo:
 - Verify cross-file references (command names, config field names, agent names, guide paths)
-- Check that template permissions match the permission table above
-- Ensure consistency between templates and self-hosted agent files
-- Confirm `plugin-version` is bumped when templates change
+- Check that plugin JS permission maps match the permission table above
+- Ensure workflow.json template and self-hosted config use `{ name, model }` objects
+- Confirm guide files are self-consistent with skills that reference them

@@ -17,9 +17,14 @@
     "typecheck": ""
   },
   "agents": {
-    "coreCoder": "core-coder",
-    "coreReviewers": ["core-reviewer-1", "core-reviewer-2"],
-    "reviewers": ["reviewer-1"],
+    "coreCoder": { "name": "core-coder", "model": "" },
+    "coreReviewers": [
+      { "name": "core-reviewer-1", "model": "" },
+      { "name": "core-reviewer-2", "model": "" }
+    ],
+    "reviewers": [
+      { "name": "reviewer-1", "model": "" }
+    ],
     "securityReviewers": []
   },
   "testDrivenDevelopment": { "enabled": false },

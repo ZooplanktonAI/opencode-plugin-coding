@@ -1,5 +1,5 @@
 ---
-description: Auto-detect project settings, generate workflow.json, and create agent files for the coding plugin.
+description: Auto-detect project settings and generate workflow.json for the coding plugin.
 ---
 
 # /zooplankton-coding-init — Project Setup
@@ -50,7 +50,7 @@ Add all found files to the `docsToRead` array.
 
 ## Step 2: Generate workflow.json
 
-Create `.opencode/workflow.json` with the detected settings:
+Create `.opencode/workflow.json` with the detected settings. The `agents` section uses `{ name, model }` objects — the plugin reads these to dynamically register agents with the correct model, permissions, and prompt.
 
 ```json
 {
@@ -71,9 +71,19 @@ Create `.opencode/workflow.json` with the detected settings:
     "typecheck": "<detected>"
   },
   "agents": {
-    "coreCoder": "core-coder",
-    "coreReviewers": ["core-reviewer-1", "core-reviewer-2"],
-    "reviewers": ["reviewer-1", "reviewer-2", "reviewer-3", "reviewer-4", "reviewer-5", "reviewer-6"],
+    "coreCoder": { "name": "core-coder", "model": "github-copilot/claude-opus-4.6" },
+    "coreReviewers": [
+      { "name": "core-reviewer-1", "model": "github-copilot/claude-sonnet-4.6" },
+      { "name": "core-reviewer-2", "model": "github-copilot/gpt-5.4" }
+    ],
+    "reviewers": [
+      { "name": "reviewer-1", "model": "alibaba-coding-plan-cn/glm-5" },
+      { "name": "reviewer-2", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" },
+      { "name": "reviewer-3", "model": "alibaba-coding-plan-cn/qwen3.5-plus" },
+      { "name": "reviewer-4", "model": "alibaba-coding-plan-cn/kimi-k2.5" },
+      { "name": "reviewer-5", "model": "volcengine-plan/ark-code-latest" },
+      { "name": "reviewer-6", "model": "volcengine-plan/deepseek-v3.2" }
+    ],
     "securityReviewers": []
   },
   "testDrivenDevelopment": { "enabled": false },
@@ -90,67 +100,9 @@ mkdir -p .opencode
 
 Write the file. If `.opencode/workflow.json` already exists, warn the user and ask before overwriting.
 
-## Step 3: Generate Agent Files
+**How agents work:** The plugin JS reads `workflow.json` at startup and dynamically registers each agent via OpenCode's `config.agent` API, using the guide files (`guides/*.md`) as prompts and the role-appropriate permissions. No `.opencode/agents/*.md` files are needed in consumer projects — the plugin handles everything.
 
-Create `.opencode/agents/` directory and generate a markdown agent file for each agent listed in `workflow.json`. Each agent name in workflow.json corresponds to a `.opencode/agents/<name>.md` file.
-
-If `.opencode/agents/` already has files, warn the user and ask before overwriting existing agent files.
-
-### Template-based generation
-
-Agent files are generated from 4 templates in `templates/agents/`. Each template has a `$MODEL` placeholder that is replaced with the assigned model ID.
-
-| Agent category | Template file | workflow.json field |
-|----------------|---------------|---------------------|
-| Core coder | `templates/agents/core-coder.md` | `agents.coreCoder` |
-| Core reviewer | `templates/agents/core-reviewer.md` | `agents.coreReviewers` |
-| Normal reviewer | `templates/agents/reviewer.md` | `agents.reviewers` |
-| Security reviewer | `templates/agents/security-reviewer.md` | `agents.securityReviewers` |
-
-### Generation procedure
-
-For each agent name in workflow.json:
-
-1. Determine the template based on which field the name belongs to
-2. Read the template file content
-3. Replace `$MODEL` with the default model for that agent (see defaults below)
-4. Write the result to `.opencode/agents/<name>.md`
-
-### Default model assignments
-
-**Core coder:**
-
-| Agent name | Default model |
-|------------|---------------|
-| `core-coder` | `github-copilot/claude-opus-4.6` |
-
-**Core reviewers (in order):**
-
-| Agent name | Default model |
-|------------|---------------|
-| `core-reviewer-1` | `github-copilot/claude-sonnet-4.6` |
-| `core-reviewer-2` | `github-copilot/gpt-5.4` |
-
-**Normal reviewers (in order):**
-
-| Agent name | Default model |
-|------------|---------------|
-| `reviewer-1` | `alibaba-coding-plan-cn/glm-5` |
-| `reviewer-2` | `alibaba-coding-plan-cn/MiniMax-M2.5` |
-| `reviewer-3` | `alibaba-coding-plan-cn/qwen3.5-plus` |
-| `reviewer-4` | `alibaba-coding-plan-cn/kimi-k2.5` |
-| `reviewer-5` | `volcengine-plan/ark-code-latest` |
-| `reviewer-6` | `volcengine-plan/deepseek-v3.2` |
-
-**Security reviewers (in order):**
-
-| Agent name | Default model |
-|------------|---------------|
-| `security-reviewer-1` | `alibaba-coding-plan-cn/glm-5` |
-
-If the user adds more agents than there are default models, prompt them to specify a model for the extra agents.
-
-## Step 4: Update .gitignore
+## Step 3: Update .gitignore
 
 Append these entries to the project's `.gitignore` idempotently (only add lines that are not already present):
 
@@ -165,15 +117,14 @@ Append these entries to the project's `.gitignore` idempotently (only add lines 
 
 Check each line before appending — do not create duplicates.
 
-## Step 5: Create Required Directories
+## Step 4: Create Required Directories
 
 ```bash
 mkdir -p .opencode/plans
 mkdir -p .opencode/retrospectives
-mkdir -p .opencode/agents
 ```
 
-## Step 6: Print Summary
+## Step 5: Print Summary
 
 After setup, print a summary:
 
@@ -190,24 +141,24 @@ After setup, print a summary:
 - test: `<command>` (or "not detected")
 - typecheck: `<command>` (or "not detected")
 
-**Agent files created:**
-- `.opencode/agents/core-coder.md`
-- `.opencode/agents/core-reviewer-1.md`
-- `.opencode/agents/core-reviewer-2.md`
-- `.opencode/agents/reviewer-1.md` ... `reviewer-6.md`
+**Agents configured (via workflow.json):**
+- Core coder: `core-coder` → `github-copilot/claude-opus-4.6`
+- Core reviewers: `core-reviewer-1`, `core-reviewer-2`
+- Normal reviewers: `reviewer-1` ... `reviewer-6`
+- Security reviewers: (none — add to workflow.json to enable)
 
-**Other files created/updated:**
+**Files created/updated:**
 - `.opencode/workflow.json` — project configuration
 - `.gitignore` — updated with plugin ignore patterns
 
 **Manual review checklist:**
 - [ ] Verify detected commands are correct in `.opencode/workflow.json`
-- [ ] Review model assignments in `.opencode/agents/*.md` files
-- [ ] Add or remove agent files and update `workflow.json` agent lists accordingly
-- [ ] Add entries to `agents.securityReviewers` and create agent files if needed
+- [ ] Review model assignments in `workflow.json` → `agents` section
+- [ ] Add or remove agents and adjust model IDs as needed
+- [ ] Add entries to `agents.securityReviewers` if security review is needed
 - [ ] Enable `testDrivenDevelopment` if using test-driven development
 - [ ] Set `reviewFocus` entries if this project has specific review emphases
 - [ ] Review `docsToRead` list and add any project-specific docs
 
-> **Tip:** When the plugin is updated, run `/zooplankton-coding-update` to sync agent file templates while preserving your model assignments.
+> **Note:** Agents are registered dynamically by the plugin from workflow.json — no agent `.md` files needed. To change models or add/remove agents, just edit `workflow.json` and restart OpenCode.
 ```

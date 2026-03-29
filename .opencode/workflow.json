@@ -16,10 +16,22 @@
     "typecheck": ""
   },
   "agents": {
-    "coreCoder": "core-coder",
-    "coreReviewers": ["core-reviewer-1", "core-reviewer-2"],
-    "reviewers": ["reviewer-1", "reviewer-2", "reviewer-3", "reviewer-4", "reviewer-5", "reviewer-6"],
-    "securityReviewers": ["security-reviewer-1"]
+    "coreCoder": { "name": "core-coder", "model": "github-copilot/claude-opus-4.6" },
+    "coreReviewers": [
+      { "name": "core-reviewer-1", "model": "github-copilot/claude-sonnet-4.6" },
+      { "name": "core-reviewer-2", "model": "github-copilot/gpt-5.4" }
+    ],
+    "reviewers": [
+      { "name": "reviewer-1", "model": "alibaba-coding-plan-cn/glm-5" },
+      { "name": "reviewer-2", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" },
+      { "name": "reviewer-3", "model": "alibaba-coding-plan-cn/qwen3.5-plus" },
+      { "name": "reviewer-4", "model": "alibaba-coding-plan-cn/kimi-k2.5" },
+      { "name": "reviewer-5", "model": "volcengine-plan/ark-code-latest" },
+      { "name": "reviewer-6", "model": "volcengine-plan/deepseek-v3.2" }
+    ],
+    "securityReviewers": [
+      { "name": "security-reviewer-1", "model": "alibaba-coding-plan-cn/glm-5" }
+    ]
   },
   "testDrivenDevelopment": { "enabled": false },
   "docsToRead": [],

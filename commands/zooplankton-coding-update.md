@@ -1,95 +1,93 @@
 ---
-description: Sync agent files with the latest plugin templates while preserving model assignments.
+description: Check workflow.json for schema updates and show what's new in the plugin.
 ---
 
-# /zooplankton-coding-update — Sync Agent Templates
+# /zooplankton-coding-update — Sync Configuration
 
-When the user runs `/zooplankton-coding-update`, compare the plugin's agent templates against the project's agent files and offer to update them.
+When the user runs `/zooplankton-coding-update`, check the project's workflow.json against the current plugin schema and report any needed updates.
 
-## Step 1: Identify Agent Files
+## Step 1: Read Current Configuration
 
-Read `.opencode/workflow.json` → `agents` to get all agent names and their categories:
+Read `.opencode/workflow.json` from the project. If it doesn't exist, tell the user to run `/zooplankton-coding-init` first.
 
-- `agents.coreCoder` → template: `templates/agents/core-coder.md`
-- `agents.coreReviewers[]` → template: `templates/agents/core-reviewer.md`
-- `agents.reviewers[]` → template: `templates/agents/reviewer.md`
-- `agents.securityReviewers[]` → template: `templates/agents/security-reviewer.md`
+## Step 2: Schema Validation
 
-## Step 2: Compare Versions
+Compare the project's `workflow.json` against the template at `templates/workflow.json`. Check for:
 
-For each agent name, read both files:
+### Missing fields
 
-- **Template**: the corresponding `templates/agents/<type>.md`
-- **Project file**: `.opencode/agents/<name>.md`
-
-Extract the `# plugin-version: N` line from both files. Compare:
-
-| Template version | Project version | Action |
-|------------------|-----------------|--------|
-| Same | Same | Skip — up to date |
-| Higher | Lower | Offer update |
-| — | Missing | Project file has no version line — treat as outdated |
-| — | File doesn't exist | Offer to create (same as `/zooplankton-coding-init` would) |
-
-## Step 3: Show Diff for Each Outdated File
-
-For each file that needs updating:
-
-1. Read the project file's `model:` line from YAML frontmatter — this is the **user's model assignment**
-2. Read the template file content
-3. Replace `$MODEL` in the template with the user's existing model assignment
-4. Show the diff between the current project file and the new content
-
-Present the diff to the user like:
+If the template has fields that the project file lacks, list them:
 
 ```
-### <name>.md (version 1 → 2)
-
-Model preserved: `<model-id>`
-
-Changes:
-- <summary of what changed in the template>
-
-Accept this update? [y/n]
+New fields available:
+- `<field>`: <description> (default: <value>)
 ```
 
-## Step 4: Apply Accepted Updates
+Offer to add them with sensible defaults.
 
-For each file the user accepts:
+### Deprecated fields
 
-1. Write the updated content to `.opencode/agents/<name>.md`
-2. Preserve the user's `model:` line from the original file
+If the project file has fields that are no longer in the template, warn:
 
-For each file the user rejects:
+```
+Deprecated fields found:
+- `<field>`: <reason>
+```
+
+### Agent format migration
+
+If the project's `agents` section uses the old bare-string format:
+
+```json
+"coreCoder": "core-coder"
+```
+
+Offer to migrate to the new `{ name, model }` format:
+
+```json
+"coreCoder": { "name": "core-coder", "model": "" }
+```
+
+Show the proposed migration and ask for confirmation before writing.
+
+## Step 3: Guide Changes Summary
+
+Read the plugin's guide files (`guides/*.md`) and show a brief changelog if significant changes were made since the last update. This is informational only — guides are loaded dynamically by the plugin, so no action is needed from the user.
+
+```
+Plugin guide updates (applied automatically):
+- core-coder-guide.md: <summary of changes, or "no changes">
+- core-reviewer-guide.md: <summary>
+- reviewer-guide.md: <summary>
+- security-reviewer-guide.md: <summary>
+```
+
+## Step 4: Apply Accepted Changes
+
+For each change the user accepts:
+
+1. Update `.opencode/workflow.json` with the new fields/format
+2. Preserve all existing user values
+
+For each change the user rejects:
 
 1. Skip — leave unchanged
-2. Note that the file is still outdated
+2. Note that the configuration may be outdated
 
-## Step 5: Handle New Agents
-
-If workflow.json lists agent names that have no corresponding `.opencode/agents/<name>.md` file:
-
-1. List the missing agents
-2. Ask the user for model assignments (or use defaults from `/zooplankton-coding-init`)
-3. Generate the files from templates
-
-## Step 6: Print Summary
+## Step 5: Print Summary
 
 ```
 ## /zooplankton-coding-update Complete
 
-**Updated:** <count> agent files
-**Skipped:** <count> (user declined or already up to date)
-**Created:** <count> new agent files
+**Schema updates applied:** <count>
+**Schema updates skipped:** <count>
 
-Files updated:
-- .opencode/agents/<name>.md (v1 → v2)
-- ...
+**Reminder:** Agents are registered dynamically from workflow.json by the plugin.
+To change models or add/remove agents, edit `.opencode/workflow.json` and restart OpenCode.
 ```
 
 ## Rules
 
-- **Never overwrite the model line** without user confirmation — model assignments are the primary user customization
-- **Preserve any user additions** below the frontmatter (e.g., custom instructions the user appended)
-- If a project file has custom content beyond the standard template body, warn the user that it will be replaced and show the diff
-- The version line (`# plugin-version: N`) must be a YAML comment inside the frontmatter (between the `---` delimiters)
+- **Never overwrite user values** without confirmation — model assignments, agent names, project settings are user customizations
+- **Preserve comments** if the file has any (though JSON doesn't support comments, some users use JSONC)
+- If no updates are needed, say so clearly and exit

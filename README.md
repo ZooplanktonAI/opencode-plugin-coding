@@ -1,6 +1,6 @@
 # opencode-plugin-coding
 
-A shared [OpenCode](https://opencode.ai) plugin for multi-agent software development workflows. Provides skills, guides, and templates that standardize the full cycle: brainstorm, plan, implement, review, debug, and retrospect.
+A shared [OpenCode](https://opencode.ai) plugin for multi-agent software development workflows. Provides skills, guides, and dynamically registered agents that standardize the full cycle: brainstorm, plan, implement, review, debug, and retrospect.
 
 ## Skills
 
@@ -18,21 +18,12 @@ A shared [OpenCode](https://opencode.ai) plugin for multi-agent software develop
 
 | Command | Description |
 |---------|-------------|
-| `/zooplankton-coding-init` | Auto-detect project, generate `workflow.json` and agent files |
-| `/zooplankton-coding-update` | Sync agent files with latest plugin templates (preserves model assignments) |
-
-## Agent Templates
-
-4 templates in `templates/agents/` cover all agent roles. Each has a `$MODEL` placeholder and a `# plugin-version: N` YAML comment in the frontmatter for update tracking.
-
-| Template | Role | Default instances |
-|----------|------|-------------------|
-| `core-coder.md` | Core implementation agent | 1 |
-| `core-reviewer.md` | Core reviewer (blocking, worktree) | 2 |
-| `reviewer.md` | Normal reviewer (non-blocking, diff-based) | 6 |
-| `security-reviewer.md` | Security reviewer (pre-merge) | 0 (opt-in) |
+| `/zooplankton-coding-init` | Auto-detect project, generate `workflow.json` |
+| `/zooplankton-coding-update` | Check workflow.json schema updates, show plugin changes |
 
 ## Guides
+
+Guide files define the prompt and behavior for each agent role. The plugin loads them automatically — they are not installed in consumer projects.
 
 - `guides/core-coder-guide.md` — Instructions for the core implementation agent
 - `guides/core-reviewer-guide.md` — Instructions for core reviewers (worktree + full verification)
@@ -54,7 +45,7 @@ Add the plugin to your project's `opencode.json`:
 }
 ```
 
-OpenCode will auto-install the plugin via Bun at startup. The plugin registers all skills and commands automatically — no symlinks or manual copies needed.
+OpenCode will auto-install the plugin via Bun at startup. The plugin registers all skills, commands, and agents automatically — no symlinks, manual copies, or `.opencode/agents/*.md` files needed.
 
 ### Global installation (optional)
 
@@ -74,8 +65,6 @@ To make the plugin available across all projects without adding it to each proje
 
 Option A is recommended — it uses the same auto-install mechanism as per-project plugins.
 
-> **How it works:** The plugin uses OpenCode's `config` hook to add its `skills/` directory to the skill discovery paths and register `/zooplankton-coding-init` and `/zooplankton-coding-update` commands from its `commands/` directory.
-
 ### 2. Run /zooplankton-coding-init
 
 From your project root in OpenCode, run:
@@ -86,23 +75,14 @@ From your project root in OpenCode, run:
 
 This will:
 - Auto-detect project settings (language, framework, package manager, commands)
-- Generate `.opencode/workflow.json` with project-specific configuration
-- Generate `.opencode/agents/*.md` files for all configured agents (core-coder, reviewers, etc.)
+- Generate `.opencode/workflow.json` with project-specific configuration and agent definitions
 - Update `.gitignore` for ephemeral plugin files
 
 ### 3. Configure agents
 
-Review the generated agent files in `.opencode/agents/`. Each file is generated from one of 4 templates (`templates/agents/`) with the model ID injected. Adjust model IDs as needed — the agent names in `workflow.json` reference these files.
+Review the `agents` section in `.opencode/workflow.json`. Each agent is a `{ name, model }` object. The plugin reads these at startup and dynamically registers agents with the appropriate permissions and prompts from the guide files. To change models or add/remove agents, just edit `workflow.json` and restart OpenCode.
 
-### 4. Keep agents in sync
-
-When the plugin updates its agent templates, run:
-
-```
-/zooplankton-coding-update
-```
-
-This diffs the plugin templates against your project's agent files, preserves your model assignments, and lets you accept or reject each change.
+> **How it works:** The plugin uses OpenCode's `config` hook to register agents via `config.agent`, skills via `config.skills.paths`, and commands via `config.command`.
 
 ## Project-Level Files
 
@@ -110,7 +90,7 @@ After `/zooplankton-coding-init`, your project will have:
 
 | File | Committed? | Purpose |
 |------|-----------|---------|
-| `.opencode/workflow.json` | Yes | Project configuration |
+| `.opencode/workflow.json` | Yes | Project configuration + agent definitions |
 | `.opencode/reviewer-knowledge.json` | No (gitignored) | Adaptive reviewer scoring cache |
 | `.opencode/plans/<branch>.md` | No (gitignored) | Ephemeral plan files |
 | `.opencode/retrospectives/<branch>.md` | No (gitignored) | Ephemeral retrospective files |
@@ -138,9 +118,15 @@ After `/zooplankton-coding-init`, your project will have:
     "typecheck": "npx tsc --noEmit"
   },
   "agents": {
-    "coreCoder": "core-coder",
-    "coreReviewers": ["core-reviewer-1", "core-reviewer-2"],
-    "reviewers": ["reviewer-1", "reviewer-2", "reviewer-3", "reviewer-4", "reviewer-5", "reviewer-6"],
+    "coreCoder": { "name": "core-coder", "model": "github-copilot/claude-opus-4.6" },
+    "coreReviewers": [
+      { "name": "core-reviewer-1", "model": "github-copilot/claude-sonnet-4.6" },
+      { "name": "core-reviewer-2", "model": "github-copilot/gpt-5.4" }
+    ],
+    "reviewers": [
+      { "name": "reviewer-1", "model": "alibaba-coding-plan-cn/glm-5" },
+      { "name": "reviewer-2", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" }
+    ],
     "securityReviewers": []
   },
   "testDrivenDevelopment": { "enabled": false },
