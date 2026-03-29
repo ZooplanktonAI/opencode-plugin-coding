@@ -7,7 +7,6 @@ How to install and use `opencode-plugin-coding` in your project.
 ## Prerequisites
 
 - [OpenCode](https://opencode.ai) installed and working
-- Git SSH access to `github.com/ZooplanktonAI/opencode-plugin-coding`
 - A GitHub repo with an `AGENTS.md` (recommended)
 
 ---
@@ -20,12 +19,14 @@ Create or edit `opencode.json` in your project root:
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
-    "opencode-plugin-coding@git+ssh://git@github.com/ZooplanktonAI/opencode-plugin-coding.git"
+    "opencode-plugin-coding"
   ]
 }
 ```
 
-OpenCode installs the plugin automatically via Bun on startup. No symlinks, no manual copies.
+OpenCode installs the plugin automatically from npm via Bun on startup. No symlinks, no manual copies.
+
+To pin a specific version: `"opencode-plugin-coding@0.1.0"`.
 
 ### Global installation (optional)
 
@@ -222,7 +223,7 @@ Normal/security reviewers can only run: `gh api *`, `gh pr diff *`, `gh pr view 
 
 ## Updating the plugin
 
-When the plugin is updated upstream, OpenCode pulls the latest on next startup (since it's installed from git). Run `/zooplankton-coding-update` to check if your `workflow.json` needs schema changes.
+When the plugin is updated, bump the version in `opencode.json` or use `"opencode-plugin-coding"` (without a version) to always get the latest. OpenCode pulls the latest on next startup. Run `/zooplankton-coding-update` to check if your `workflow.json` needs schema changes.
 
 Guide file changes take effect immediately — they're loaded from the plugin, not copied to your project.
 
@@ -231,8 +232,8 @@ Guide file changes take effect immediately — they're loaded from the plugin, n
 ## Troubleshooting
 
 **Plugin not loading:**
-- Verify `opencode.json` has the correct `plugin` entry
-- Check SSH access: `ssh -T git@github.com` (should show your GitHub username)
+- Verify `opencode.json` has the correct `plugin` entry (e.g., `"opencode-plugin-coding"`)
+- Run `npm view opencode-plugin-coding` to confirm the package is accessible
 - Restart OpenCode after changing `opencode.json`
 
 **Agents not appearing:**
