@@ -7,22 +7,21 @@ How to install and use `opencode-plugin-coding` in your project.
 ## Prerequisites
 
 - [OpenCode](https://opencode.ai) installed and working
-- Git SSH access to `github.com/ZooplanktonAI/opencode-plugin-coding`
+- GitHub HTTPS access to `github.com/ZooplanktonAI/opencode-plugin-coding` (via `gh auth setup-git`)
 - A GitHub repo with an `AGENTS.md` (recommended)
 
-### SSH config for ZooplanktonAI repos
+### GitHub credential setup
 
-If you use a dedicated SSH key for ZooplanktonAI (separate from your default GitHub key), add a Host alias to `~/.ssh/config`:
+The plugin is installed via `git+https://` URLs. Ensure your `gh` CLI is configured as git's credential helper:
 
-```
-Host github.com-zooplankton
-  HostName github.com
-  User git
-  IdentityFile ~/.ssh/id_ed25519_zooplankton
-  IdentitiesOnly yes
+```bash
+gh auth login          # if not already logged in
+gh auth setup-git      # configures git to use gh for HTTPS credentials
 ```
 
-The plugin URLs use `github.com-zooplankton` as the hostname so that Bun/git automatically uses the correct key when cloning the private repo. Without this, OpenCode's `bun install` will try the default SSH key and fail with a permission error.
+This allows Bun to clone the private repo via HTTPS when OpenCode installs the plugin.
+
+> **Note:** `git+ssh://` URLs are NOT supported by OpenCode's plugin parser (it incorrectly splits on the `@` in `git@github.com`). Always use `git+https://`.
 
 ---
 
@@ -34,7 +33,7 @@ Create or edit `opencode.json` in your project root:
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
-    "opencode-plugin-coding@git+ssh://git@github.com-zooplankton/ZooplanktonAI/opencode-plugin-coding.git"
+    "opencode-plugin-coding@git+https://github.com/ZooplanktonAI/opencode-plugin-coding.git"
   ]
 }
 ```
@@ -245,9 +244,9 @@ Guide file changes take effect immediately — they're loaded from the plugin, n
 ## Troubleshooting
 
 **Plugin not loading:**
-- Verify `opencode.json` has the correct `plugin` entry (must use `github.com-zooplankton` hostname)
-- Check SSH alias works: `ssh -T git@github.com-zooplankton` (should show your ZooplanktonAI GitHub username)
-- If using a dedicated SSH key, verify `~/.ssh/config` has the Host alias (see Prerequisites above)
+- Verify `opencode.json` has the correct `plugin` entry (must use `git+https://`, NOT `git+ssh://`)
+- Verify `gh auth status` shows you're logged in with access to the ZooplanktonAI org
+- Verify `gh auth setup-git` has been run (configures git credential helper for HTTPS)
 - Restart OpenCode after changing `opencode.json`
 
 **Agents not appearing:**

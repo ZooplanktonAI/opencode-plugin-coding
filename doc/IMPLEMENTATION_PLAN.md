@@ -275,7 +275,7 @@ Distribution uses the OpenCode plugin system:
   - Reads `commands/*.md` and registers them via `config.command`.
 - **Install method**: Add to `"plugin"` array in project `opencode.json`:
   ```
-  "plugin": ["opencode-plugin-coding@git+ssh://git@github.com-zooplankton/ZooplanktonAI/opencode-plugin-coding.git"]
+  "plugin": ["opencode-plugin-coding@git+https://github.com/ZooplanktonAI/opencode-plugin-coding.git"]
   ```
 - **`package.json`** has `"type": "module"` and `"main": ".opencode/plugins/opencode-plugin-coding.js"`.
 - **No symlinks** needed in consumer projects.
