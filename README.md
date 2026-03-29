@@ -23,7 +23,7 @@ A shared [OpenCode](https://opencode.ai) plugin for multi-agent software develop
 
 ## Agent Templates
 
-4 templates in `templates/agents/` cover all agent roles. Each has a `$MODEL` placeholder and a `# plugin-version: N` header for update tracking.
+4 templates in `templates/agents/` cover all agent roles. Each has a `$MODEL` placeholder and a `# plugin-version: N` YAML comment in the frontmatter for update tracking.
 
 | Template | Role | Default instances |
 |----------|------|-------------------|

@@ -1,5 +1,5 @@
-# plugin-version: 2
 ---
+# plugin-version: 2
 description: Security reviewer — pre-merge security analysis.
 mode: subagent
 model: alibaba-coding-plan-cn/glm-5

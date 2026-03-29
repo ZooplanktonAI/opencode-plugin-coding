@@ -58,7 +58,7 @@ All content files are markdown (`.md`). The only JS file is the plugin entry poi
 ### Agent templates
 
 4 templates in `templates/agents/`. Each has:
-- `# plugin-version: N` as the first line (for update tracking)
+- `# plugin-version: N` as a YAML comment inside the frontmatter (for update tracking)
 - `$MODEL` placeholder in YAML frontmatter (replaced during `/zooplankton-coding-init`)
 - Full permission block matching what the source repos use
 
@@ -94,7 +94,7 @@ Each consumer project has `.opencode/workflow.json` with project-specific settin
 - **The orchestrate skill is the largest file** (~430 lines). When editing, be careful with the phase structure. Use targeted edits, not full rewrites.
 - **`.opencode/reviewer-knowledge.json`** is gitignored and ephemeral. Accept loss on fresh clone.
 - **Plan/retrospective files** are gitignored. Only completed plans >7 days old are auto-deleted; stale non-completed plans trigger alerts.
-- **The `# plugin-version: N` line must be the first line** of agent template files — before the YAML frontmatter delimiter.
+- **The `# plugin-version: N` line must be a YAML comment inside the frontmatter** (between the `---` delimiters). Placing it before the opening `---` breaks frontmatter parsing.
 - **Use `<<'EOF'` (single-quoted)** in heredocs within skill/guide bash examples to prevent shell variable expansion inside JSON.
 
 ## Review Focus

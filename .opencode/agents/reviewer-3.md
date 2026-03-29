@@ -1,5 +1,5 @@
-# plugin-version: 2
 ---
+# plugin-version: 2
 description: Code reviewer (non-blocking) — diff-based review on assigned areas.
 mode: subagent
 model: alibaba-coding-plan-cn/qwen3.5-plus

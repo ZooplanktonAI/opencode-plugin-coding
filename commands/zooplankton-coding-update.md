@@ -92,4 +92,4 @@ Files updated:
 - **Never overwrite the model line** without user confirmation — model assignments are the primary user customization
 - **Preserve any user additions** below the frontmatter (e.g., custom instructions the user appended)
 - If a project file has custom content beyond the standard template body, warn the user that it will be replaced and show the diff
-- The version line (`# plugin-version: N`) must always be the first line of the file
+- The version line (`# plugin-version: N`) must be a YAML comment inside the frontmatter (between the `---` delimiters)

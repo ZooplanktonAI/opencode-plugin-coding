@@ -107,15 +107,7 @@ Write the approved plan to `.opencode/plans/<branch>.md` and set status to `not_
 
 ## Phase 3: Review
 
-### 3a. Security Review (if configured)
-
-If `workflow.json` → `agents.securityReviewers` is non-empty:
-
-1. Invoke each `@<name>` in `agents.securityReviewers` with the PR number (see `guides/security-reviewer-guide.md`)
-2. If any verdict is **BLOCK**: send critical/high findings to `@<coreCoder>` for fixes before proceeding
-3. If all verdicts are **PASS**: continue to 3b
-
-### 3b. Parallel Code Review
+### 3a. Parallel Code Review
 
 Invoke **all reviewers in a single parallel message** (one Task call per reviewer).
 
@@ -133,11 +125,16 @@ For each name in `agents.reviewers`, invoke `@<name>`:
 
 Each reviewer follows their respective guide (`guides/core-reviewer-guide.md` or `guides/reviewer-guide.md`).
 
-### 3c. Collect Results (Non-Blocking Wait)
+### 3b. Collect Results (Non-Blocking Wait)
 
 **Proceed to Phase 4 as soon as both core reviewers have returned results.** Include results from any normal reviewers that have already completed; treat non-returned normal reviewers as having raised no issues for that round.
 
 This is the "admin-style" non-blocking wait — core reviewers form the quorum, normal reviewers contribute opportunistically.
+
+**Implementation rule (important):**
+- Do not block Phase 4 waiting for slow/stuck normal reviewers.
+- Dispatch normal reviewers independently, but only gate on `agents.coreReviewers` completion.
+- If a normal reviewer task hangs/fails, retry once; if still unavailable, mark as no result for this round and continue.
 
 ---
 
@@ -155,6 +152,16 @@ Count unique blocking and advisory issues across all reviewers.
 **Critical rules:**
 - **Never merge without explicit user confirmation.**
 - **Always post the pre-merge PR summary comment before asking the user to merge.**
+
+### 4a. Final Security Gate (if configured)
+
+Run security review **after** code-review rounds converge and **immediately before** pre-merge summary/merge decision.
+
+If `workflow.json` → `agents.securityReviewers` is non-empty:
+
+1. Invoke each `@<name>` in `agents.securityReviewers` with the PR number (see `guides/security-reviewer-guide.md`)
+2. If any verdict is **BLOCK**: send critical/high findings to `@<coreCoder>` for fixes, then return to Phase 3
+3. If all verdicts are **PASS**: continue to pre-merge summary
 
 ### Address Feedback
 
