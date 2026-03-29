@@ -40,30 +40,22 @@ Add the plugin to your project's `opencode.json`:
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
-    "opencode-plugin-coding@git+ssh://git@github.com/ZooplanktonAI/opencode-plugin-coding.git"
+    "opencode-plugin-coding"
   ]
 }
 ```
 
-OpenCode will auto-install the plugin via Bun at startup. The plugin registers all skills, commands, and agents automatically — no symlinks, manual copies, or `.opencode/agents/*.md` files needed.
+OpenCode will auto-install the plugin from npm via Bun at startup. The plugin registers all skills, commands, and agents automatically — no symlinks, manual copies, or `.opencode/agents/*.md` files needed.
+
+### Pin a specific version (optional)
+
+```json
+"plugin": ["opencode-plugin-coding@0.1.0"]
+```
 
 ### Global installation (optional)
 
-To make the plugin available across all projects without adding it to each project's `opencode.json`:
-
-**Option A:** Add to your global OpenCode config at `~/.config/opencode/opencode.json`:
-
-```json
-{
-  "plugin": [
-    "opencode-plugin-coding@git+ssh://git@github.com/ZooplanktonAI/opencode-plugin-coding.git"
-  ]
-}
-```
-
-**Option B:** Place the plugin JS file in `~/.config/opencode/plugins/`. This requires manually cloning the repo and keeping it updated.
-
-Option A is recommended — it uses the same auto-install mechanism as per-project plugins.
+To make the plugin available across all projects without adding it to each project's `opencode.json`, add the same `plugin` entry to `~/.config/opencode/opencode.json`.
 
 ### 2. Run /zooplankton-coding-init
 
@@ -137,4 +129,4 @@ After `/zooplankton-coding-init`, your project will have:
 
 ## License
 
-UNLICENSED — private to ZooplanktonAI.
+MIT
