@@ -35,6 +35,7 @@ opencode-plugin-coding/
 │   └── retrospective.md                    # Retrospective template
 ├── doc/
 │   ├── IMPLEMENTATION_PLAN.md              # Canonical implementation roadmap
+│   ├── SMOKE_TEST.md                       # Orchestrate flow smoke-test checklist
 │   └── TODO.md                             # Deferred advisory items from reviews
 ├── package.json
 ├── README.md
@@ -100,6 +101,7 @@ Each consumer project has `.opencode/workflow.json` with project-specific settin
 - **Use `<<'EOF'` (single-quoted)** in heredocs within skill/guide bash examples to prevent shell variable expansion inside JSON.
 - **No agent `.md` files in consumer projects** — agents are registered dynamically. If you see references to `.opencode/agents/*.md` in consumer projects, those are stale artifacts from before the architecture change.
 - **Session reuse across review rounds** — the orchestrate skill recommends passing `task_id` to resume reviewer sessions across rounds, so reviewers retain context. If a resumed session fails, fall back to a fresh session.
+- **Orchestrate smoke test** — to validate the full orchestrate flow in this repo, see `doc/SMOKE_TEST.md`. Use a trivial change (e.g., docs tweak) and run all 5 phases. Note that this repo has no build/lint/test/typecheck commands configured in `.opencode/workflow.json`, so verification steps will report "N/A — not configured."
 
 ## Review Focus
 
