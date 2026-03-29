@@ -56,6 +56,24 @@ Add the plugin to your project's `opencode.json`:
 
 OpenCode will auto-install the plugin via Bun at startup. The plugin registers all skills and commands automatically — no symlinks or manual copies needed.
 
+### Global installation (optional)
+
+To make the plugin available across all projects without adding it to each project's `opencode.json`:
+
+**Option A:** Add to your global OpenCode config at `~/.config/opencode/opencode.json`:
+
+```json
+{
+  "plugin": [
+    "opencode-plugin-coding@git+ssh://git@github.com/ZooplanktonAI/opencode-plugin-coding.git"
+  ]
+}
+```
+
+**Option B:** Place the plugin JS file in `~/.config/opencode/plugins/`. This requires manually cloning the repo and keeping it updated.
+
+Option A is recommended — it uses the same auto-install mechanism as per-project plugins.
+
 > **How it works:** The plugin uses OpenCode's `config` hook to add its `skills/` directory to the skill discovery paths and register `/zooplankton-coding-init` and `/zooplankton-coding-update` commands from its `commands/` directory.
 
 ### 2. Run /zooplankton-coding-init
