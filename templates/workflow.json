@@ -1,0 +1,28 @@
+{
+  "$schema": "TODO: define schema",
+  "project": {
+    "name": "",
+    "repo": "",
+    "defaultBranch": "main"
+  },
+  "stack": {
+    "language": "",
+    "framework": "",
+    "packageManager": ""
+  },
+  "commands": {
+    "build": "",
+    "lint": "",
+    "test": "",
+    "typecheck": ""
+  },
+  "agents": {
+    "coreCoder": { "model": "" },
+    "coreReviewers": { "model": "", "count": 2 },
+    "reviewers": { "model": "", "count": 4 },
+    "securityReviewer": { "enabled": false }
+  },
+  "tdd": { "enabled": false },
+  "docsToRead": [],
+  "reviewFocus": ""
+}

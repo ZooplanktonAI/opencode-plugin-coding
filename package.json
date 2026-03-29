@@ -1,0 +1,11 @@
+{
+  "name": "opencode-plugin-coding",
+  "version": "0.1.0",
+  "description": "A shared OpenCode plugin for multi-agent software development workflows: brainstorm, plan, orchestrate, review, debug.",
+  "private": true,
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ZooplanktonAI/opencode-plugin-coding.git"
+  }
+}
