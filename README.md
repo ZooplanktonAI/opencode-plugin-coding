@@ -41,17 +41,22 @@ A shared [OpenCode](https://opencode.ai) plugin for multi-agent software develop
 
 ## Setup
 
-### 1. Install skills into your project
+### 1. Install the plugin
 
-Symlink or copy the skills into your project's `.opencode/skills/` directory:
+Add the plugin to your project's `opencode.json`:
 
-```bash
-# Symlink approach (recommended for development)
-ln -s /path/to/opencode-plugin-coding/skills/* .opencode/skills/
-
-# Or copy for standalone use
-cp -r /path/to/opencode-plugin-coding/skills/* .opencode/skills/
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    "opencode-plugin-coding@git+ssh://git@github.com/ZooplanktonAI/opencode-plugin-coding.git"
+  ]
+}
 ```
+
+OpenCode will auto-install the plugin via Bun at startup. The plugin registers all skills and commands automatically — no symlinks or manual copies needed.
+
+> **How it works:** The plugin uses OpenCode's `config` hook to add its `skills/` directory to the skill discovery paths and register `/init` and `/update` commands from its `commands/` directory.
 
 ### 2. Run /init
 

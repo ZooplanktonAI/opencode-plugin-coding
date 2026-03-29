@@ -46,7 +46,6 @@ The plugin should reduce duplicated local skill files, preserve project-specific
 ### Explicitly out of scope (v1)
 
 - Security reviewer timing modes beyond pre-merge.
-- Rich distribution automation decisions (symlink vs npm install hooks vs submodule). Decide in final validation phase.
 - Large per-project override surfaces for reviewer area mapping.
 
 ## 3) High-Level Architecture
@@ -267,20 +266,21 @@ For each project:
 - Run one end-to-end orchestrate cycle on a small task.
 - Validate reviewer flow, cleanup behavior, and retrospective outputs.
 
-### Phase H: Distribution decision (deferred)
+### Phase H: Distribution — Plugin-based (DECIDED)
 
-Evaluate and choose final approach after real usage:
+Distribution uses the OpenCode plugin system:
 
-- symlink model,
-- plugin install automation,
-- or hybrid model.
-
-Decision criteria:
-
-- reliability,
-- update ergonomics,
-- least friction for all 3 repos,
-- minimal drift risk.
+- **Plugin JS** (`.opencode/plugins/opencode-plugin-coding.js`) exports a `config` hook that:
+  - Adds the plugin's `skills/` directory to `config.skills.paths` for skill discovery.
+  - Reads `commands/*.md` and registers them via `config.command`.
+- **Install method**: Add to `"plugin"` array in project `opencode.json`:
+  ```
+  "plugin": ["opencode-plugin-coding@git+ssh://git@github.com/ZooplanktonAI/opencode-plugin-coding.git"]
+  ```
+- **`package.json`** has `"type": "module"` and `"main": ".opencode/plugins/opencode-plugin-coding.js"`.
+- **No symlinks** needed in consumer projects.
+- **Self-hosting**: The plugin repo itself loads the plugin from `.opencode/plugins/` (auto-discovered by OpenCode).
+- **Agent files** (`.opencode/agents/*.md`) are still per-project. `/init` generates them from templates.
 
 ## 12) Acceptance Criteria (v1)
 

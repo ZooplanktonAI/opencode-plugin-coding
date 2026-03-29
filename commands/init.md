@@ -1,5 +1,4 @@
 ---
-name: init
 description: Auto-detect project settings, generate workflow.json, and create agent files for the coding plugin.
 ---
 

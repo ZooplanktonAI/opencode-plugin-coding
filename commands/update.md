@@ -1,5 +1,4 @@
 ---
-name: update
 description: Sync agent files with the latest plugin templates while preserving model assignments.
 ---
 
