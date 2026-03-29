@@ -1,0 +1,251 @@
+# Installation Guide
+
+How to install and use `opencode-plugin-coding` in your project.
+
+---
+
+## Prerequisites
+
+- [OpenCode](https://opencode.ai) installed and working
+- Git SSH access to `github.com/ZooplanktonAI/opencode-plugin-coding`
+- A GitHub repo with an `AGENTS.md` (recommended)
+
+---
+
+## Step 1: Add the plugin
+
+Create or edit `opencode.json` in your project root:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    "opencode-plugin-coding@git+ssh://git@github.com/ZooplanktonAI/opencode-plugin-coding.git"
+  ]
+}
+```
+
+OpenCode installs the plugin automatically via Bun on startup. No symlinks, no manual copies.
+
+### Global installation (optional)
+
+To make the plugin available in all projects, add the same `plugin` entry to `~/.config/opencode/opencode.json` instead of per-project.
+
+---
+
+## Step 2: Initialize the project
+
+Start OpenCode in your project root and run:
+
+```
+/zooplankton-coding-init
+```
+
+This auto-detects your project and generates `.opencode/workflow.json`:
+
+- **Project identity** — repo name, default branch (from git remote)
+- **Stack** — language, framework, package manager (from `package.json` / lock files)
+- **Commands** — build, lint, test, typecheck (from `package.json` scripts)
+- **Agents** — default set of core-coder, core-reviewers, and normal reviewers
+- **`.gitignore`** — appends ignore patterns for ephemeral plugin files
+
+After init, review the output and verify detected settings.
+
+---
+
+## Step 3: Configure workflow.json
+
+Open `.opencode/workflow.json` and review/adjust:
+
+### Commands
+
+```json
+"commands": {
+  "build": "yarn build",
+  "lint": "yarn lint",
+  "test": "yarn test",
+  "typecheck": "npx tsc --noEmit"
+}
+```
+
+Set any unconfigured command to `""` (empty string). Core reviewers will report it as `N/A` in their verification table.
+
+### Agents
+
+Each agent is a `{ name, model }` object. The plugin dynamically registers agents from this section — no `.opencode/agents/*.md` files needed.
+
+```json
+"agents": {
+  "coreCoder": { "name": "core-coder", "model": "github-copilot/claude-opus-4.6" },
+  "coreReviewers": [
+    { "name": "core-reviewer-1", "model": "github-copilot/claude-sonnet-4.6" },
+    { "name": "core-reviewer-2", "model": "github-copilot/gpt-5.4" }
+  ],
+  "reviewers": [
+    { "name": "reviewer-1", "model": "alibaba-coding-plan-cn/glm-5" },
+    { "name": "reviewer-2", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" },
+    { "name": "reviewer-3", "model": "alibaba-coding-plan-cn/qwen3.5-plus" },
+    { "name": "reviewer-4", "model": "alibaba-coding-plan-cn/kimi-k2.5" },
+    { "name": "reviewer-5", "model": "volcengine-plan/ark-code-latest" },
+    { "name": "reviewer-6", "model": "volcengine-plan/deepseek-v3.2" }
+  ],
+  "securityReviewers": []
+}
+```
+
+**Agent roles:**
+
+| Role | Count | Behavior |
+|------|-------|----------|
+| `coreCoder` | 1 | Implements code in a worktree, creates PRs, addresses review feedback |
+| `coreReviewers` | 2+ | Blocking quorum — checkout worktree, run all verification, review all areas |
+| `reviewers` | 1–6+ | Non-blocking — diff-based review on assigned focus areas via GitHub API |
+| `securityReviewers` | 0+ | Pre-merge security gate — runs after code review converges, can block merge |
+
+To add/remove agents or change models, edit this section and restart OpenCode.
+
+### Review focus
+
+Add project-specific review emphases. Reviewers use these as an additional lens alongside their assigned canonical areas (logic, types, architecture, error handling, tests, docs):
+
+```json
+"reviewFocus": ["type safety", "error handling", "game balance"]
+```
+
+### Docs to read
+
+List files that all agents should read before starting work:
+
+```json
+"docsToRead": ["AGENTS.md", "doc/ARCHITECTURE.md"]
+```
+
+### Test-driven development
+
+Enable to activate the RED-GREEN-REFACTOR skill:
+
+```json
+"testDrivenDevelopment": { "enabled": true }
+```
+
+---
+
+## Step 4: Create worktrees
+
+The orchestrate skill uses git worktrees for the core-coder and core-reviewers. These are created automatically on first orchestration, but you can create them upfront:
+
+```bash
+git worktree add --detach .worktrees/core-coder
+git worktree add --detach .worktrees/core-reviewer-1
+git worktree add --detach .worktrees/core-reviewer-2
+```
+
+The `/zooplankton-coding-init` command adds `.worktrees/` to `.gitignore`.
+
+---
+
+## Usage
+
+### Full orchestration workflow
+
+Tell the primary agent to implement something. The `orchestrate` skill activates automatically for coding tasks:
+
+```
+Implement feature X as described in issue #123.
+```
+
+The orchestrator will:
+
+1. **Plan** — invoke core-coder to produce a structured plan; present for approval
+2. **Implement** — core-coder works in worktree, commits, pushes, creates PR
+3. **Review** — all reviewers run in parallel (core reviewers block, normal reviewers are non-blocking)
+4. **Evaluate** — address blocking issues (up to 3 rounds), then run security gate if configured
+5. **Merge** — post pre-merge summary, ask for user approval, squash-merge
+6. **Retrospect** — write retrospective, update reviewer scores, propose AGENTS.md changes
+
+### Individual skills
+
+You can also use skills directly:
+
+| Skill | When to use |
+|-------|-------------|
+| `brainstorm` | Refine a rough idea into a validated design |
+| `plan` | Break a design into implementation tasks |
+| `orchestrate` | Full implement-review-merge cycle |
+| `test-driven-development` | Write tests first, then implement |
+| `systematic-debugging` | Methodical bug investigation |
+| `git-worktree` | Manage worktrees manually |
+| `playwright` | Browser automation (requires Playwright MCP server) |
+
+### Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/zooplankton-coding-init` | First-time project setup |
+| `/zooplankton-coding-update` | Check for workflow.json schema updates after plugin upgrades |
+
+---
+
+## What gets created in your project
+
+| Path | Committed? | Purpose |
+|------|-----------|---------|
+| `opencode.json` | Yes | Plugin registration |
+| `.opencode/workflow.json` | Yes | Project config + agent definitions |
+| `.opencode/reviewer-knowledge.json` | No | Adaptive reviewer scoring (resets on fresh clone) |
+| `.opencode/plans/*.md` | No | Ephemeral plan files (auto-cleaned after 7 days) |
+| `.opencode/retrospectives/*.md` | No | Ephemeral retrospective files (auto-cleaned after 7 days) |
+| `.worktrees/` | No | Git worktrees for core-coder and core-reviewers |
+
+---
+
+## How it works
+
+The plugin uses OpenCode's `config` hook to register everything dynamically at startup:
+
+1. **Skills** — added to `config.skills.paths` for automatic discovery
+2. **Commands** — registered into `config.command` from `commands/*.md`
+3. **Agents** — registered into `config.agent` by reading `workflow.json` + `guides/*.md`
+
+Agent prompts come from the guide files bundled in the plugin. Permissions are hardcoded per role:
+
+| Role | edit | bash | read | webfetch |
+|------|------|------|------|----------|
+| core-coder | allow | all | allow | allow |
+| core-reviewer | deny | all | allow | deny |
+| normal reviewer | deny | `gh` only | allow | deny |
+| security reviewer | deny | `gh` only | allow | deny |
+
+Normal/security reviewers can only run: `gh api *`, `gh pr diff *`, `gh pr view *`, `gh pr checks *`.
+
+---
+
+## Updating the plugin
+
+When the plugin is updated upstream, OpenCode pulls the latest on next startup (since it's installed from git). Run `/zooplankton-coding-update` to check if your `workflow.json` needs schema changes.
+
+Guide file changes take effect immediately — they're loaded from the plugin, not copied to your project.
+
+---
+
+## Troubleshooting
+
+**Plugin not loading:**
+- Verify `opencode.json` has the correct `plugin` entry
+- Check SSH access: `ssh -T git@github.com` (should show your GitHub username)
+- Restart OpenCode after changing `opencode.json`
+
+**Agents not appearing:**
+- Verify `.opencode/workflow.json` exists and has a valid `agents` section
+- Each agent needs both `name` and `model` fields
+- Restart OpenCode after editing `workflow.json`
+
+**Worktree errors:**
+- Run `git worktree list` to check existing worktrees
+- Remove stale worktrees: `git worktree remove .worktrees/<name>`
+- Recreate: `git worktree add --detach .worktrees/<name>`
+
+**Reviewer posting failures (wrong line numbers):**
+- Reviewers are instructed to validate line numbers against the diff before posting
+- If a reviewer consistently fails, check if the model supports the `gh pr diff` output format
+- The orchestrator retries failed reviewer tasks once before marking as no result

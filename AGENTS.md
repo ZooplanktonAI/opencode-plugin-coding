@@ -39,6 +39,7 @@ opencode-plugin-coding/
 │   └── TODO.md                             # Deferred advisory items from reviews
 ├── package.json
 ├── README.md
+├── INSTALL.md                              # Installation guide for consumer projects
 └── AGENTS.md                               # This file
 ```
 
