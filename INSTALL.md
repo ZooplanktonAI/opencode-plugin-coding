@@ -7,21 +7,8 @@ How to install and use `opencode-plugin-coding` in your project.
 ## Prerequisites
 
 - [OpenCode](https://opencode.ai) installed and working
-- GitHub HTTPS access to `github.com/ZooplanktonAI/opencode-plugin-coding` (via `gh auth setup-git`)
+- Git SSH access to `github.com/ZooplanktonAI/opencode-plugin-coding`
 - A GitHub repo with an `AGENTS.md` (recommended)
-
-### GitHub credential setup
-
-The plugin is installed via `git+https://` URLs. Ensure your `gh` CLI is configured as git's credential helper:
-
-```bash
-gh auth login          # if not already logged in
-gh auth setup-git      # configures git to use gh for HTTPS credentials
-```
-
-This allows Bun to clone the private repo via HTTPS when OpenCode installs the plugin.
-
-> **Note:** `git+ssh://` URLs are NOT supported by OpenCode's plugin parser (it incorrectly splits on the `@` in `git@github.com`). Always use `git+https://`.
 
 ---
 
@@ -33,7 +20,7 @@ Create or edit `opencode.json` in your project root:
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
-    "opencode-plugin-coding@git+https://github.com/ZooplanktonAI/opencode-plugin-coding.git"
+    "opencode-plugin-coding@git+ssh://git@github.com/ZooplanktonAI/opencode-plugin-coding.git"
   ]
 }
 ```
@@ -244,9 +231,8 @@ Guide file changes take effect immediately — they're loaded from the plugin, n
 ## Troubleshooting
 
 **Plugin not loading:**
-- Verify `opencode.json` has the correct `plugin` entry (must use `git+https://`, NOT `git+ssh://`)
-- Verify `gh auth status` shows you're logged in with access to the ZooplanktonAI org
-- Verify `gh auth setup-git` has been run (configures git credential helper for HTTPS)
+- Verify `opencode.json` has the correct `plugin` entry
+- Check SSH access: `ssh -T git@github.com` (should show your GitHub username)
 - Restart OpenCode after changing `opencode.json`
 
 **Agents not appearing:**
