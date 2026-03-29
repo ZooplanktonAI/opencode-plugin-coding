@@ -39,7 +39,9 @@ git checkout --detach origin/$BRANCH
 
 ### Step 2: Run full verification
 
-Run every command from `workflow.json` → `commands`. Record pass/fail and error output for each. If a command is not configured (empty or absent in `workflow.json`), record `N/A` — do not skip it from the verification table.
+Run every command from `workflow.json` → `commands`. Record the result and error output for each.
+
+Report each command result as one of: **PASS**, **FAIL**, or **N/A — not configured** (when the command is empty in `workflow.json`).
 
 Example (adapt to project):
 
@@ -141,7 +143,7 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
 {
   "commit_id": "ACTUAL_SHA",
   "event": "COMMENT",
-  "body": "**[Round N] model-id:**\n\n### Verification\n| Command | Result |\n|---|---|\n| `<typecheck>` | PASS / FAIL |\n| `<lint>` | PASS / FAIL |\n| `<test>` | PASS / FAIL |\n| `<build>` | PASS / FAIL / N/A |\n\n### Findings\n1. [Blocking] ...\n2. [Advisory] ...",
+  "body": "**[Round N] model-id:**\n\n### Verification\n| Command | Result |\n|---|---|\n| `<typecheck>` | PASS / FAIL / N/A — not configured |\n| `<lint>` | PASS / FAIL / N/A — not configured |\n| `<test>` | PASS / FAIL / N/A — not configured |\n| `<build>` | PASS / FAIL / N/A — not configured |\n\n### Findings\n1. [Blocking] ...\n2. [Advisory] ...",
   "comments": [
     {
       "path": "src/path/to/file.ts",
@@ -164,7 +166,7 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
 {
   "commit_id": "ACTUAL_SHA",
   "event": "COMMENT",
-  "body": "**[Round N] model-id:**\n\n### Verification\n| Command | Result |\n|---|---|\n| `<typecheck>` | PASS / FAIL |\n| `<lint>` | PASS / FAIL |\n| `<test>` | PASS / FAIL |\n| `<build>` | PASS / FAIL / N/A |\n\nLGTM"
+  "body": "**[Round N] model-id:**\n\n### Verification\n| Command | Result |\n|---|---|\n| `<typecheck>` | PASS / FAIL / N/A — not configured |\n| `<lint>` | PASS / FAIL / N/A — not configured |\n| `<test>` | PASS / FAIL / N/A — not configured |\n| `<build>` | PASS / FAIL / N/A — not configured |\n\nLGTM"
 }
 EOF
 ```
