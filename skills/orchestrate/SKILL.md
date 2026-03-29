@@ -98,7 +98,7 @@ Write the approved plan to `.opencode/plans/<branch>.md` and set status to `not_
 
 1. Set plan status to `in_progress`
 2. Invoke `@<coreCoder>` with the implementation template
-3. Core-coder must work in `.worktrees/<coreCoder>`, create a feature branch from `origin/<defaultBranch>`, implement, run all verification commands, commit, push, and create a PR
+3. Core-coder must work in `.worktrees/<coreCoder.name>`, create a feature branch from `origin/<defaultBranch>`, implement, run all verification commands, commit, push, and create a PR
 4. Core-coder returns: **PR number, PR URL, branch name**
 5. Record these for Phase 3
 
@@ -158,7 +158,7 @@ Run security review **after** code-review rounds converge and **immediately befo
 
 If `workflow.json` → `agents.securityReviewers` is non-empty:
 
-1. Invoke each `@<name>` in `agents.securityReviewers` with the PR number (see `guides/security-reviewer-guide.md`)
+1. Invoke each `@<entry.name>` in `agents.securityReviewers` with the PR number (see `guides/security-reviewer-guide.md`)
 2. If any verdict is **BLOCK**: send critical/high findings to `@<coreCoder>` for fixes, then return to Phase 3
 3. If all verdicts are **PASS**: continue to pre-merge summary
 
@@ -274,7 +274,7 @@ Do NOT implement — planning only.
 ### Core-coder: Implementation
 
 ```
-Implement the approved plan in .worktrees/<coreCoder>.
+Implement the approved plan in .worktrees/<coreCoder.name>.
 
 Plan:
 <approved plan>
@@ -404,7 +404,7 @@ BRANCH=$(gh pr view $PR_NUMBER --json headRefName -q ".headRefName")
 gh pr merge $PR_NUMBER --squash --admin --repo <REPO>
 git checkout <defaultBranch> && git pull --ff-only origin <defaultBranch>
 # Detach all worktrees (coreCoder.name + each entry.name in agents.coreReviewers)
-git -C .worktrees/<coreCoder> checkout --detach HEAD
+git -C .worktrees/<coreCoder.name> checkout --detach HEAD
 # For each entry in agents.coreReviewers:
 git -C .worktrees/<entry.name> checkout --detach HEAD
 git branch -D $BRANCH

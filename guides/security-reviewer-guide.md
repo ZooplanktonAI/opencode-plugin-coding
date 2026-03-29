@@ -1,12 +1,12 @@
 # Security Reviewer Guide
 
-Applies to the dedicated security reviewer agent. In v1, this reviewer runs **pre-merge only** — after implementation but before the normal review round begins.
+Applies to the dedicated security reviewer agent. In v1, this reviewer runs **pre-merge only** — after code-review rounds converge and immediately before the merge decision.
 
 ---
 
 ## Purpose
 
-The security reviewer provides a focused security analysis of the PR diff. It can **block** progression to the normal review round if critical security issues are found. This is a specialized role — it does not replace the security aspects of core/normal reviewers but adds a dedicated, thorough security pass.
+The security reviewer provides a focused security analysis of the PR diff. It can **block** the merge if critical security issues are found. This is a specialized role — it does not replace the security aspects of core/normal reviewers but adds a dedicated, thorough security pass that runs after all code-review rounds have converged.
 
 ---
 
@@ -14,7 +14,7 @@ The security reviewer provides a focused security analysis of the PR diff. It ca
 
 - **Repository:** Use the repo name from `.opencode/workflow.json` → `project.repo`
 - **Substitute all placeholders:** `PR_NUMBER`, `BRANCH`, `ROUND`, `MODEL_ID`, `SHA`
-- **Timing:** Pre-merge only (runs before core/normal reviewers in the orchestrate flow)
+- **Timing:** Pre-merge only (runs after code-review rounds converge, immediately before merge decision)
 - **Allowed bash commands:** `gh api *`, `gh pr view *`, `gh pr diff *`
 
 ---
@@ -91,8 +91,8 @@ Perform a systematic security review across these categories:
 
 | Severity | Criteria | Action |
 |----------|----------|--------|
-| **Critical** | Exploitable vulnerability, data breach risk, auth bypass | **Blocks** review round — must be fixed first |
-| **High** | Significant security weakness, requires attacker effort | **Blocks** review round |
+| **Critical** | Exploitable vulnerability, data breach risk, auth bypass | **Blocks** merge — must be fixed first |
+| **High** | Significant security weakness, requires attacker effort | **Blocks** merge |
 | **Medium** | Defense-in-depth issue, hardening opportunity | **Advisory** — reported but does not block |
 | **Low** | Best practice, minor hardening | **Advisory** |
 | **Info** | Observation, no direct risk | **Advisory** |
@@ -144,4 +144,4 @@ Return exactly:
 4. **Medium/Low/Info findings** — count + one-line description of each (advisory)
 5. **Posting status** — review ID if succeeded, or failure description
 
-If verdict is **BLOCK**, the orchestrator must send critical/high findings to `core-coder` for fixes before proceeding to the normal review round.
+If verdict is **BLOCK**, the orchestrator sends critical/high findings to `core-coder` for fixes, then returns to Phase 3 (code review). After code-review rounds converge again, the security review re-runs.
