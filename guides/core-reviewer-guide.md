@@ -112,7 +112,7 @@ git log origin/<defaultBranch>..HEAD --oneline
 - **Tests** — adequate coverage, missing test cases, regression risk
 - **Docs** — should AGENTS.md, TODO.md, or other docs be updated?
 
-Also check project-specific concerns from `workflow.json` → `reviewFocus` and the `docsToRead` files.
+Also check project-specific concerns from `workflow.json` → `reviewFocus` (short emphasis labels like `"type safety"`, `"module boundaries"`) and look up the detailed rules in the `docsToRead` files.
 
 ### Step 7: Classify findings
 

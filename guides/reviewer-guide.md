@@ -81,7 +81,7 @@ Do **not** reply to other reviewers' comments.
 
 The orchestrator assigns you **1–2 focus areas** from: logic, types, architecture, error handling, tests, docs. Focus your review on your assigned areas, but report any critical issues you notice outside them.
 
-If the orchestrator provides a **`reviewFocus`** list (from `workflow.json`), use those as an additional lens — they highlight project-specific concerns (e.g., "skill correctness", "guide clarity"). Apply them alongside your assigned areas, not instead of them.
+If the orchestrator provides a **`reviewFocus`** list (from `workflow.json`), use those as an additional lens. These are short emphasis labels (e.g., `"type safety"`, `"mongoose import patterns"`, `"module boundaries"`) that highlight what the project cares most about. Look up the detailed rules in `AGENTS.md` or `docsToRead` files. Apply them alongside your assigned areas, not instead of them.
 
 General review checklist:
 
