@@ -40,7 +40,7 @@ Add the plugin to your project's `opencode.json`:
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
-    "opencode-plugin-coding@git+ssh://git@github.com-zooplankton/ZooplanktonAI/opencode-plugin-coding.git"
+    "opencode-plugin-coding@git+https://github.com/ZooplanktonAI/opencode-plugin-coding.git"
   ]
 }
 ```
@@ -56,7 +56,7 @@ To make the plugin available across all projects without adding it to each proje
 ```json
 {
   "plugin": [
-    "opencode-plugin-coding@git+ssh://git@github.com-zooplankton/ZooplanktonAI/opencode-plugin-coding.git"
+    "opencode-plugin-coding@git+https://github.com/ZooplanktonAI/opencode-plugin-coding.git"
   ]
 }
 ```
