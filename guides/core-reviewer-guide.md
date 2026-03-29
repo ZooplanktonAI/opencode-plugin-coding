@@ -1,3 +1,203 @@
 # Core Reviewer Guide
 
-TODO: Implement core-reviewer guide.
+Applies to: `core-reviewer-primary`, `core-reviewer-secondary`.
+
+Core reviewers differ from normal reviewers in three ways: worktree checkout, full verification (all gate commands), and deep cross-reviewer analysis.
+
+---
+
+## Critical Constraints
+
+- **Repository:** Use the repo name from `.opencode/workflow.json` → `project.repo`. Hardcode it in all `gh api` calls — never resolve dynamically.
+- **Substitute all placeholders:** `PR_NUMBER`, `BRANCH`, `ROUND`, `MODEL_ID`, `SHA` are templates. Replace with actual values before running any command.
+- **Worktrees:** `core-reviewer-primary` uses `.worktrees/core-reviewer-primary`; `core-reviewer-secondary` uses `.worktrees/core-reviewer-secondary`.
+
+---
+
+## Comment Format (Required)
+
+Every comment — summary body, every inline comment, every reply — **must** start with:
+
+```
+**[Round N] <your-model-id>:**
+```
+
+Example: `**[Round 2] github-copilot/claude-sonnet-4.6:**`
+
+---
+
+## Workflow
+
+### Step 1: Clean worktree and check out the PR branch
+
+```bash
+git merge --abort 2>/dev/null; git rebase --abort 2>/dev/null; git cherry-pick --abort 2>/dev/null
+git checkout -- . 2>/dev/null; git clean -fd
+git fetch origin
+git checkout --detach origin/$BRANCH
+```
+
+### Step 2: Run full verification
+
+Run every command from `workflow.json` → `commands`. Record pass/fail and error output for each.
+
+Example (adapt to project):
+
+```bash
+<packageManager> install
+<typecheck command>
+<lint command>
+<test command>
+<build command>  # if configured
+```
+
+### Step 3: Read project standards
+
+Read from the worktree:
+
+1. `AGENTS.md`
+2. All files from `workflow.json` → `docsToRead`
+3. Any additional docs passed by the orchestrator
+
+### Step 4: Reply to your own prior inline comments (Round > 1 only)
+
+Find your own reviews by body prefix match, then reply to each inline comment with resolution status. Use your own review ID only — this is race-safe.
+
+```bash
+# Find your own review IDs
+gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
+  --jq '[.[] | select(.body | test("^\\*\\*\\[Round [0-9]+\\] YOUR_MODEL_ID:")) | .id]'
+
+# For each review ID, fetch your inline comments
+gh api repos/<REPO>/pulls/$PR_NUMBER/reviews/$REVIEW_ID/comments \
+  --jq '[.[] | {id, path, line, body}]'
+
+# Reply to each
+gh api repos/<REPO>/pulls/$PR_NUMBER/comments/$COMMENT_ID/replies \
+  --method POST \
+  --field body="**[Round $ROUND] $MODEL_ID:** [ADDRESSED / PARTIALLY ADDRESSED / NOT ADDRESSED] — <one sentence>"
+```
+
+Do **not** reply to other reviewers' comments.
+
+### Step 5: Read all other reviewers' comments critically (every round)
+
+```bash
+gh api repos/<REPO>/pulls/$PR_NUMBER/reviews
+gh api repos/<REPO>/pulls/$PR_NUMBER/comments
+```
+
+Read critically:
+
+- **Missed issues** — something other reviewers didn't catch
+- **False positives** — incorrect or overly strict findings; call these out explicitly
+- **False negatives** — issues others raised that you independently agree with
+- Do **not** echo-chamber: never repeat another reviewer's finding unless independently verified in the diff
+
+### Step 6: Review the code changes
+
+```bash
+git diff origin/<defaultBranch>..HEAD
+git log origin/<defaultBranch>..HEAD --oneline
+```
+
+**Review areas** (all areas for core reviewers):
+
+- **Logic** — correctness, edge cases, off-by-one errors
+- **Types** — type safety, `any`, unsafe casts, `@ts-expect-error`
+- **Architecture** — separation of concerns, layer boundaries, dependency direction
+- **Error handling** — input validation, null safety, async error propagation, security
+- **Tests** — adequate coverage, missing test cases, regression risk
+- **Docs** — should AGENTS.md, TODO.md, or other docs be updated?
+
+Also check project-specific concerns from `workflow.json` → `reviewFocus` and the `docsToRead` files.
+
+### Step 7: Classify findings
+
+| Class | Criteria |
+|-------|----------|
+| **Blocking** | Incorrect logic, data corruption risk, crash/regression, security vulnerability, spec violation |
+| **Advisory** | Readability, naming, non-critical UX, optional tests, style improvements |
+
+When uncertain, prefer **advisory**.
+
+### Step 8: Post the review
+
+#### Get head SHA
+
+```bash
+COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid --jq '.headRefOid')
+```
+
+#### Post with JSON heredoc (preferred — most reliable)
+
+```bash
+gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
+  --method POST \
+  --header "Content-Type: application/json" \
+  --input - <<'EOF'
+{
+  "commit_id": "ACTUAL_SHA",
+  "event": "COMMENT",
+  "body": "**[Round N] model-id:**\n\n## Review Summary\n\n### Verification Results\n\n| Command | Result |\n|---|---|\n| `<typecheck>` | PASS / FAIL |\n| `<lint>` | PASS / FAIL |\n| `<test>` | PASS / FAIL |\n| `<build>` | PASS / FAIL |\n\n### Overall Assessment\n<assessment>\n\n### Findings\n<list issues or 'No issues found.'>",
+  "comments": [
+    {
+      "path": "src/path/to/file.ts",
+      "line": 42,
+      "side": "RIGHT",
+      "body": "**[Round N] model-id:**\n<inline comment>"
+    }
+  ]
+}
+EOF
+```
+
+#### Alternative: Post with --field flags
+
+```bash
+gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
+  --method POST \
+  --field commit_id="$COMMIT_SHA" \
+  --field event="COMMENT" \
+  --field body="<review body>" \
+  --field "comments[][path]=src/path/to/file.ts" \
+  --field "comments[][line]=42" \
+  --field "comments[][side]=RIGHT" \
+  --field "comments[][body]=**[Round $ROUND] $MODEL_ID:** <comment text>"
+```
+
+**Rules:**
+
+- `event`: always `"COMMENT"` — never `"APPROVE"` or `"REQUEST_CHANGES"`
+- `body` (review summary): **must never be empty**
+- `line`: must be a line number present in the diff RIGHT side — verify before posting
+- `side`: `"RIGHT"` always
+- Omit `comments` entirely when no inline comments
+- Use `<<'EOF'` (single-quoted) so the shell does not expand `$` inside JSON
+
+#### Verify posting succeeded
+
+Check that the response contains `"id":`. If absent or errored, retry once using the `--field` form. Report success/failure — **do not silently discard findings**.
+
+---
+
+## Conciseness Rules (Strictly Enforced)
+
+- Each inline comment: **1–3 sentences max** — state the issue, cite the line, done
+- Review summary: **bullet list of findings only** — no conversational preambles, no conclusion paragraphs
+- No verbose spec quotes or summaries
+- Duplicate-post guard: check if a review from you for the current round already exists before posting
+
+---
+
+## Output to Orchestrator
+
+Return exactly:
+
+1. **Verification results** — pass/fail for each command
+2. **Posting status** — review ID if succeeded, or failure description
+3. **Total issues:** `<count>`
+4. **Blocking issues** — count + one-line description of each
+5. **Advisory issues** — count + one-line description of each
+6. **Cross-reviewer notes** — missed issues / false positives / false negatives from other reviewers
+7. **(Round > 1)** Prior issue resolution — ADDRESSED / PARTIALLY ADDRESSED / NOT ADDRESSED for each
