@@ -107,7 +107,7 @@ To add/remove agents or change models, edit this section and restart OpenCode.
 
 ### Review focus
 
-Add project-specific review emphases. Reviewers use these as an additional lens alongside their assigned canonical areas (logic, types, architecture, error handling, tests, docs):
+Add project-specific review emphases as short labels. Reviewers use these as an additional lens alongside their assigned canonical areas (logic, types, architecture, error handling, tests, docs). Keep entries concise — detailed rules should live in `AGENTS.md` or `docsToRead` files, not here.
 
 ```json
 "reviewFocus": ["type safety", "error handling", "game balance"]
