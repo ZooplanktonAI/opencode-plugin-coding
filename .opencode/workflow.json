@@ -1,0 +1,27 @@
+{
+  "project": {
+    "name": "opencode-plugin-coding",
+    "repo": "ZooplanktonAI/opencode-plugin-coding",
+    "defaultBranch": "main"
+  },
+  "stack": {
+    "language": "markdown",
+    "framework": "",
+    "packageManager": "npm"
+  },
+  "commands": {
+    "build": "",
+    "lint": "",
+    "test": "",
+    "typecheck": ""
+  },
+  "agents": {
+    "coreCoder": { "model": "github-copilot/claude-opus-4.6" },
+    "coreReviewers": { "model": "github-copilot/claude-sonnet-4.6", "count": 2 },
+    "reviewers": { "model": "", "count": 4 },
+    "securityReviewer": { "enabled": false }
+  },
+  "tdd": { "enabled": false },
+  "docsToRead": ["doc/IMPLEMENTATION_PLAN.md"],
+  "reviewFocus": "skill correctness, guide clarity, template completeness"
+}
