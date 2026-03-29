@@ -33,9 +33,12 @@ Checklist for validating the orchestrate workflow end-to-end within this reposit
 | 10 | Retrospective | `.opencode/retrospectives/<branch>.md` written |
 | 11 | Reviewer knowledge | `.opencode/reviewer-knowledge.json` updated with scores |
 | 12 | Plan completed | Plan file status set to `completed` |
+| 13 | Security review gate | If `securityReviewers` configured, security reviewer posted verdict before merge |
+| 14 | `doc/TODO.md` evaluated | On final revision round, core-coder reported TODO.md additions or dismissals |
 
 ## Notes
 
-- This repo has no build/lint/test/typecheck commands configured in `workflow.json`. Verification steps will report "not configured" — that is expected.
-- Security reviewers are configured but only run pre-merge. Verify they execute if `agents.securityReviewers` is non-empty.
+- This repo has no build/lint/test/typecheck commands configured in `.opencode/workflow.json`. Verification steps will report one of: **PASS**, **FAIL**, or **N/A — not configured**. All three are valid outcomes depending on project setup.
+- Security reviewers are configured in this repo (`agents.securityReviewers` in `.opencode/workflow.json`) and only run pre-merge. Checkpoint 13 validates this gate.
 - The smoke test is intentionally run on a trivial change to minimize risk.
+- The default branch is read from `.opencode/workflow.json` → `project.defaultBranch`. It is `master` for this repo but may differ in other projects.
