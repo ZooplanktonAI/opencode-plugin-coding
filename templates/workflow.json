@@ -19,11 +19,11 @@
   "agents": {
     "coreCoder": { "name": "core-coder", "model": "" },
     "coreReviewers": [
-      { "name": "core-reviewer-1", "model": "" },
-      { "name": "core-reviewer-2", "model": "" }
+      { "name": "core-reviewer-primary", "model": "" },
+      { "name": "core-reviewer-secondary", "model": "" }
     ],
     "reviewers": [
-      { "name": "reviewer-1", "model": "" }
+      { "name": "reviewer-glm", "model": "" }
     ],
     "securityReviewers": []
   },

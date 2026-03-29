@@ -112,12 +112,12 @@ After `/zooplankton-coding-init`, your project will have:
   "agents": {
     "coreCoder": { "name": "core-coder", "model": "github-copilot/claude-opus-4.6" },
     "coreReviewers": [
-      { "name": "core-reviewer-1", "model": "github-copilot/claude-sonnet-4.6" },
-      { "name": "core-reviewer-2", "model": "github-copilot/gpt-5.4" }
+      { "name": "core-reviewer-primary", "model": "github-copilot/claude-sonnet-4.6" },
+      { "name": "core-reviewer-secondary", "model": "github-copilot/gpt-5.4" }
     ],
     "reviewers": [
-      { "name": "reviewer-1", "model": "alibaba-coding-plan-cn/glm-5" },
-      { "name": "reviewer-2", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" }
+      { "name": "reviewer-glm", "model": "alibaba-coding-plan-cn/glm-5" },
+      { "name": "reviewer-minimax", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" }
     ],
     "securityReviewers": []
   },
