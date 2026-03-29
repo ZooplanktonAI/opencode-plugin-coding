@@ -39,7 +39,7 @@ git checkout --detach origin/$BRANCH
 
 ### Step 2: Run full verification
 
-Run every command from `workflow.json` → `commands`. Record pass/fail and error output for each.
+Run every command from `workflow.json` → `commands`. Record pass/fail and error output for each. If a command is not configured (empty or absent in `workflow.json`), record `N/A` — do not skip it from the verification table.
 
 Example (adapt to project):
 
@@ -141,7 +141,7 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
 {
   "commit_id": "ACTUAL_SHA",
   "event": "COMMENT",
-  "body": "**[Round N] model-id:**\n\n### Verification\n| Command | Result |\n|---|---|\n| `<typecheck>` | PASS / FAIL |\n| `<lint>` | PASS / FAIL |\n| `<test>` | PASS / FAIL |\n| `<build>` | PASS / FAIL |\n\n### Findings\n1. [Blocking] ...\n2. [Advisory] ...",
+  "body": "**[Round N] model-id:**\n\n### Verification\n| Command | Result |\n|---|---|\n| `<typecheck>` | PASS / FAIL |\n| `<lint>` | PASS / FAIL |\n| `<test>` | PASS / FAIL |\n| `<build>` | PASS / FAIL / N/A |\n\n### Findings\n1. [Blocking] ...\n2. [Advisory] ...",
   "comments": [
     {
       "path": "src/path/to/file.ts",
@@ -164,7 +164,7 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
 {
   "commit_id": "ACTUAL_SHA",
   "event": "COMMENT",
-  "body": "**[Round N] model-id:**\n\n### Verification\n| Command | Result |\n|---|---|\n| `<typecheck>` | PASS / FAIL |\n| `<lint>` | PASS / FAIL |\n| `<test>` | PASS / FAIL |\n| `<build>` | PASS / FAIL |\n\nLGTM"
+  "body": "**[Round N] model-id:**\n\n### Verification\n| Command | Result |\n|---|---|\n| `<typecheck>` | PASS / FAIL |\n| `<lint>` | PASS / FAIL |\n| `<test>` | PASS / FAIL |\n| `<build>` | PASS / FAIL / N/A |\n\nLGTM"
 }
 EOF
 ```
@@ -189,10 +189,14 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
 
 - `event`: always `"COMMENT"` — never `"APPROVE"` or `"REQUEST_CHANGES"`
 - `body` (review summary): **must never be empty** — write verification results + findings list or LGTM
-- `line`: must be a line number present in the diff RIGHT side — verify before posting
+- `line`: must be a line number present in the **diff hunk RIGHT side** — see validation step below
 - `side`: `"RIGHT"` always
 - Omit `comments` entirely when no inline comments
 - Use `<<'EOF'` (single-quoted) so the shell does not expand `$` inside JSON
+
+#### Validate line numbers before posting
+
+For each inline comment, confirm the target line appears in the diff. Run `git diff origin/<defaultBranch>..HEAD` in your worktree and find the file's hunk. Only lines with a `+` prefix (added) or ` ` prefix (context) on the RIGHT side are valid targets. Lines with `-` prefix (removed) are LEFT-side only and will cause a posting error. If the line number is not in any hunk, the GitHub API will reject the comment — **do not guess line numbers from the full file**; use only lines visible in the diff output.
 
 #### Verify posting succeeded
 

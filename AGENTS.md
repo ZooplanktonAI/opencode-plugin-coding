@@ -34,7 +34,8 @@ opencode-plugin-coding/
 │   ├── plan.md                             # Plan file template
 │   └── retrospective.md                    # Retrospective template
 ├── doc/
-│   └── IMPLEMENTATION_PLAN.md              # Canonical implementation roadmap
+│   ├── IMPLEMENTATION_PLAN.md              # Canonical implementation roadmap
+│   └── TODO.md                             # Deferred advisory items from reviews
 ├── package.json
 ├── README.md
 └── AGENTS.md                               # This file
@@ -98,6 +99,7 @@ Each consumer project has `.opencode/workflow.json` with project-specific settin
 - **Plan/retrospective files** are gitignored. Only completed plans >7 days old are auto-deleted; stale non-completed plans trigger alerts.
 - **Use `<<'EOF'` (single-quoted)** in heredocs within skill/guide bash examples to prevent shell variable expansion inside JSON.
 - **No agent `.md` files in consumer projects** — agents are registered dynamically. If you see references to `.opencode/agents/*.md` in consumer projects, those are stale artifacts from before the architecture change.
+- **Session reuse across review rounds** — the orchestrate skill recommends passing `task_id` to resume reviewer sessions across rounds, so reviewers retain context. If a resumed session fails, fall back to a fresh session.
 
 ## Review Focus
 

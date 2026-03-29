@@ -135,6 +135,16 @@ This is the "admin-style" non-blocking wait — core reviewers form the quorum, 
 - Dispatch normal reviewers independently, but only gate on `agents.coreReviewers` entries' completion.
 - If a normal reviewer task hangs/fails, retry once; if still unavailable, mark as no result for this round and continue.
 
+### 3c. Session Reuse Across Rounds
+
+When invoking the same reviewer agent in a subsequent round, **reuse the Task session** by passing the `task_id` returned from the previous round's invocation. This continues the subagent's conversation with full history (prior messages and tool outputs), so the reviewer retains context about their own earlier findings and can efficiently track resolution status.
+
+**Rules:**
+- Store each reviewer's `task_id` after Round 1 dispatch
+- On Round 2+, pass the stored `task_id` to resume the session instead of creating a fresh one
+- **Fallback:** if a resumed session fails (error, timeout, or unexpected state), discard the `task_id` and start a fresh session — include the round number and a note that the prior session was lost so the reviewer re-reads the diff
+- Session reuse is **optional but recommended** — a fresh session per round also works, just with more redundant diff reading
+
 ---
 
 ## Phase 4: Evaluate and Address
@@ -143,24 +153,27 @@ Count unique blocking and advisory issues across all reviewers.
 
 | Condition | Action |
 |-----------|--------|
-| No issues at all | Post pre-merge summary → ask user → merge |
+| No issues at all | Proceed to **Phase 4a (Security Gate)** |
 | Blocking issues exist, round < 3 | Increment round; send all feedback to `@<coreCoder>`; if new round = 3 add final-round signal; go to Phase 3 |
 | Advisory-only (no blocking), round < 3 | **Always final round.** Increment round; send advisories to `@<coreCoder>` with final-round signal; go to Phase 3 |
-| Round >= 3 | Stop. If previous round was blocking (not advisory-only), send final-round signal to `@<coreCoder>` for TODO.md. Post pre-merge summary → ask user whether to merge or handle manually |
+| Round >= 3 | Stop. If previous round was blocking (not advisory-only), send final-round signal to `@<coreCoder>` for TODO.md. Proceed to **Phase 4a (Security Gate)** |
 
 **Critical rules:**
 - **Never merge without explicit user confirmation.**
 - **Always post the pre-merge PR summary comment before asking the user to merge.**
+- **Security review (Phase 4a) always runs before any merge path** — even if code review found zero issues.
 
-### 4a. Final Security Gate (if configured)
+### 4a. Security Gate (if configured)
 
-Run security review **after** code-review rounds converge and **immediately before** pre-merge summary/merge decision.
+This phase runs **only when code-review rounds have fully converged** — i.e., no more revision loops remain. It is the last gate before pre-merge summary and merge decision.
+
+If `workflow.json` → `agents.securityReviewers` is empty, skip directly to pre-merge summary → ask user → merge.
 
 If `workflow.json` → `agents.securityReviewers` is non-empty:
 
 1. Invoke each `@<entry.name>` in `agents.securityReviewers` with the PR number (see `guides/security-reviewer-guide.md`)
-2. If any verdict is **BLOCK**: send critical/high findings to `@<coreCoder>` for fixes, then return to Phase 3
-3. If all verdicts are **PASS**: continue to pre-merge summary
+2. If any verdict is **BLOCK**: send critical/high findings to `@<coreCoder>` for fixes, then return to Phase 3 (code review restarts from a new round)
+3. If all verdicts are **PASS**: post pre-merge summary → ask user → merge
 
 ### Address Feedback
 
@@ -316,6 +329,7 @@ Your assigned review areas: <assigned 1-2 areas>
 Follow guides/reviewer-guide.md for the full workflow.
 
 Additional docs to read: <docsToRead from workflow.json>
+Review focus for this project: <reviewFocus from workflow.json>
 Additional files relevant to this PR: <task-specific files>
 
 Return: issue count, blocking vs advisory.
@@ -388,7 +402,7 @@ Or "All issues addressed." or "N/A — no issues raised.">
 | `<typecheck>` | PASS / FAIL |
 | `<lint>` | PASS / FAIL |
 | `<test>` | PASS (N tests) / FAIL |
-| `<build>` | PASS / FAIL |
+| `<build>` | PASS / FAIL / N/A |
 EOF
 )"
 ```

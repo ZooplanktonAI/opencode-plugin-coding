@@ -81,6 +81,8 @@ Do **not** reply to other reviewers' comments.
 
 The orchestrator assigns you **1–2 focus areas** from: logic, types, architecture, error handling, tests, docs. Focus your review on your assigned areas, but report any critical issues you notice outside them.
 
+If the orchestrator provides a **`reviewFocus`** list (from `workflow.json`), use those as an additional lens — they highlight project-specific concerns (e.g., "skill correctness", "guide clarity"). Apply them alongside your assigned areas, not instead of them.
+
 General review checklist:
 
 - **Correctness** — logic errors, edge cases, off-by-one
@@ -175,10 +177,14 @@ gh api repos/<REPO>/pulls/$PR_NUMBER/reviews \
 
 - `event`: always `"COMMENT"` — never `"APPROVE"` or `"REQUEST_CHANGES"`
 - `body` (review summary): **must never be empty** — write findings list or LGTM
-- `line`: must be a line number present in the diff RIGHT side — verify before posting
+- `line`: must be a line number present in the **diff hunk RIGHT side** — see validation step below
 - `side`: `"RIGHT"` always
 - Omit `comments` array entirely when no inline comments
 - Use `<<'EOF'` (single-quoted) so the shell does not expand `$` inside JSON
+
+#### Validate line numbers before posting
+
+For each inline comment, confirm the target line appears in the diff. Run `gh pr diff $PR_NUMBER` and find the file's hunk. Only lines with a `+` prefix (added) or ` ` prefix (context) on the RIGHT side are valid targets. Lines with `-` prefix (removed) are LEFT-side only and will cause a posting error. If the line number is not in any hunk, the GitHub API will reject the comment — **do not guess line numbers from the full file**; use only lines visible in the diff output.
 
 #### Verify posting succeeded
 
