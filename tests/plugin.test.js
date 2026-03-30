@@ -200,6 +200,24 @@ describe("loadCommands", () => {
       assert.ok(!key.endsWith(".md"), `key ${key} should not have .md suffix`);
     }
   });
+
+  it("extractFrontmatter correctly parses agent/model fields for command loading", () => {
+    // loadCommands uses pluginRoot internally and can't be redirected,
+    // so we test the frontmatter extraction path that produces agent/model fields
+    const content =
+      '---\ndescription: Test command\nagent: "my-agent"\nmodel: "my-model"\n---\nTemplate body';
+    const { meta, body } = extractFrontmatter(content);
+    assert.equal(meta.description, "Test command");
+    assert.equal(meta.agent, "my-agent");
+    assert.equal(meta.model, "my-model");
+    assert.equal(body, "Template body");
+    // Simulate the same logic loadCommands uses to build a command entry
+    const cmd = { description: meta.description, template: body.trim() };
+    if (meta.agent) cmd.agent = meta.agent;
+    if (meta.model) cmd.model = meta.model;
+    assert.equal(cmd.agent, "my-agent");
+    assert.equal(cmd.model, "my-model");
+  });
 });
 
 describe("registerAgents", () => {
@@ -273,8 +291,8 @@ describe("registerAgents", () => {
     const config = {};
     registerAgents(config, tmpDir);
     assert.ok(config.agent["bare-string-agent"]);
-    // Bare strings have no model
-    assert.equal(config.agent["bare-string-agent"].model, undefined);
+    // Bare strings have no model key at all (not just undefined value)
+    assert.ok(!("model" in config.agent["bare-string-agent"]));
   });
 
   it("does not override user-defined agents", () => {
@@ -394,6 +412,46 @@ describe("registerAgents", () => {
     assert.equal(perms.bash["*"], "allow");
     assert.equal(perms.read, "allow");
     assert.equal(perms.webfetch, "allow");
+  });
+
+  it("coreReviewer permissions: edit deny, bash allow-all, webfetch deny", () => {
+    setupFixtures({
+      agents: { coreReviewers: [{ name: "core-rev-perms", model: "m" }] },
+    });
+    const config = {};
+    registerAgents(config, tmpDir);
+    const perms = config.agent["core-rev-perms"].permission;
+    assert.equal(perms.edit, "deny");
+    assert.equal(perms.bash["*"], "allow");
+    assert.equal(perms.read, "allow");
+    assert.equal(perms.webfetch, "deny");
+  });
+
+  it("securityReviewer permissions: gh allowlist present", () => {
+    setupFixtures({
+      agents: { securityReviewers: [{ name: "sec-perms", model: "m" }] },
+    });
+    const config = {};
+    registerAgents(config, tmpDir);
+    const perms = config.agent["sec-perms"].permission;
+    assert.equal(perms.edit, "deny");
+    assert.equal(perms.bash["*"], "deny");
+    assert.equal(perms.bash["gh api *"], "allow");
+    assert.equal(perms.bash["gh pr diff *"], "allow");
+    assert.equal(perms.bash["gh pr view *"], "allow");
+    assert.equal(perms.bash["gh pr checks *"], "allow");
+    assert.equal(perms.read, "allow");
+    assert.equal(perms.webfetch, "deny");
+  });
+
+  it("no GitHub account prompt when neither role nor default configured", () => {
+    setupFixtures(
+      { agents: { reviewers: [{ name: "rev-no-gh", model: "m" }] } },
+      { github: { account: {} } }
+    );
+    const config = {};
+    registerAgents(config, tmpDir);
+    assert.ok(!config.agent["rev-no-gh"].prompt.includes("GH_TOKEN"));
   });
 });
 
