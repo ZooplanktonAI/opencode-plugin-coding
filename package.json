@@ -6,7 +6,8 @@
   "main": ".opencode/plugins/opencode-plugin-coding.js",
   "license": "MIT",
   "scripts": {
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "prepare": "husky"
   },
   "files": [
     ".opencode/plugins/",
@@ -18,5 +19,8 @@
   "repository": {
     "type": "git",
     "url": "git@github.com:ZooplanktonAI/opencode-plugin-coding.git"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
   }
 }
