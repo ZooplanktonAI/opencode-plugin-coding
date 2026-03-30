@@ -102,12 +102,33 @@ Write the file. If `.opencode/workflow.json` already exists, warn the user and a
 
 **How agents work:** The plugin JS reads `workflow.json` at startup and dynamically registers each agent via OpenCode's `config.agent` API, using the guide files (`guides/*.md`) as prompts and the role-appropriate permissions. No `.opencode/agents/*.md` files are needed in consumer projects — the plugin handles everything.
 
+## Step 2b: Generate workflow-local.json
+
+Create `.opencode/workflow-local.json` for user-specific settings (gitignored, not committed). This file stores the user's GitHub account mapping so concurrent agents don't conflict.
+
+Ask the user which GitHub accounts they use for coding (commits, PRs) and reviewing (PR comments). List available accounts with `gh auth status` to help them choose.
+
+```json
+{
+  "githubAccount": {
+    "coder": "<user's coding account>",
+    "reviewer": "<user's review account>"
+  }
+}
+```
+
+- `coder` is used by `coreCoder` and `coreReviewers` — agents that commit, push, and create PRs
+- `reviewer` is used by `reviewers` and `securityReviewers` — agents that post review comments
+
+If `.opencode/workflow-local.json` already exists, warn the user and ask before overwriting.
+
 ## Step 3: Update .gitignore
 
 Append these entries to the project's `.gitignore` idempotently (only add lines that are not already present):
 
 ```
 # opencode-plugin-coding ephemeral files
+.opencode/workflow-local.json
 .opencode/reviewer-knowledge.json
 .opencode/plans/
 .opencode/retrospectives/
@@ -149,6 +170,7 @@ After setup, print a summary:
 
 **Files created/updated:**
 - `.opencode/workflow.json` — project configuration
+- `.opencode/workflow-local.json` — user-specific GitHub account mapping (gitignored)
 - `.gitignore` — updated with plugin ignore patterns
 
 **Manual review checklist:**
@@ -159,6 +181,7 @@ After setup, print a summary:
 - [ ] Enable `testDrivenDevelopment` if using test-driven development
 - [ ] Set `reviewFocus` entries if this project has specific review emphases
 - [ ] Review `docsToRead` list and add any project-specific docs
+- [ ] Verify GitHub accounts in `workflow-local.json` match your `gh auth status`
 
 > **Note:** Agents are registered dynamically by the plugin from workflow.json — no agent `.md` files needed. To change models or add/remove agents, just edit `workflow.json` and restart OpenCode.
 ```

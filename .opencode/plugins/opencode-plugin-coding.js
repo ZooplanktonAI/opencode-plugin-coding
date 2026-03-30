@@ -73,6 +73,25 @@ const readWorkflowJson = (directory) => {
   }
 };
 
+// Read workflow-local.json (gitignored, user-specific overrides)
+const readWorkflowLocalJson = (directory) => {
+  const localPath = path.join(directory, ".opencode", "workflow-local.json");
+  if (!fs.existsSync(localPath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(localPath, "utf8"));
+  } catch {
+    return null;
+  }
+};
+
+// Map agent roles to githubAccount keys in workflow-local.json
+const ROLE_TO_ACCOUNT_KEY = {
+  coreCoder: "coder",
+  coreReviewer: "coder",
+  reviewer: "reviewer",
+  securityReviewer: "reviewer",
+};
+
 // Agent role definitions: guide file, description, and permissions
 const AGENT_ROLES = {
   coreCoder: {
@@ -156,7 +175,8 @@ const registerAgents = (config, directory) => {
   const workflow = readWorkflowJson(directory);
   if (!workflow?.agents) return;
 
-  const defaultGithubAccount = workflow.githubAccount || null;
+  const local = readWorkflowLocalJson(directory);
+  const githubAccounts = local?.githubAccount || {};
 
   config.agent = config.agent || {};
 
@@ -169,6 +189,10 @@ const registerAgents = (config, directory) => {
     // Normalize: coreCoder is a single object, others are arrays
     const agentList = Array.isArray(entries) ? entries : [entries];
 
+    // Resolve GitHub account for this role from workflow-local.json
+    const accountKey = ROLE_TO_ACCOUNT_KEY[roleKey];
+    const githubAccount = accountKey ? githubAccounts[accountKey] : null;
+
     for (const agent of agentList) {
       // Support both { name, model } objects and bare strings (backward compat)
       const name = typeof agent === "string" ? agent : agent.name;
@@ -179,10 +203,6 @@ const registerAgents = (config, directory) => {
       // Don't override user-defined agents
       if (config.agent[name]) continue;
 
-      // Resolve GitHub account: per-agent override > root default
-      const githubAccount =
-        (typeof agent === "object" && agent.githubAccount) ||
-        defaultGithubAccount;
       const prompt = githubAccount
         ? basePrompt + buildGithubAccountPrompt(githubAccount)
         : basePrompt;
