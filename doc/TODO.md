@@ -25,3 +25,14 @@ The orchestrate skill Phase 5 instructs agents to "write/merge scores into `.ope
 The `#` comment markers in the `AGENTS.md` repository structure tree are not column-aligned — filenames of different lengths cause the `#` to start at different columns (e.g., `SMOKE_TEST.md` vs `IMPLEMENTATION_PLAN.md` within `doc/`). Aligning all comment markers to a consistent column would improve readability.
 
 **File:** `AGENTS.md`, Repository Structure section
+
+---
+
+## TODO-003: Add GitHub Actions CI workflow
+
+**Source:** reviewer-minimax advisory, PR #6 Round 1  
+**Area:** tests
+
+The pre-commit hook enforces `npm test` locally, but there is no CI workflow. Commits made via the GitHub web UI, PR merges from agents in worktrees that bypass the hook, or clones where `npm install` was not run will not have tests enforced. A `.github/workflows/ci.yml` running `npm test` on every push and PR would close this gap.
+
+**File:** `.github/workflows/ci.yml` (new)
