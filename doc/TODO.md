@@ -4,35 +4,13 @@ Tracked improvements deferred from review rounds.
 
 ---
 
-## TODO-001: Orchestrate skill — reviewer-knowledge.json error handling guidance
+## TODO-004: Add CI concurrency controls to avoid redundant workflow runs
 
-**Source:** reviewer-4 advisory, PR #2 Round 1  
-**Area:** skill correctness  
+**Source:** reviewer-glm (glm-5) + reviewer-deepseek (deepseek-v3.2) advisory, PR #7 Round 1  
+**Area:** tests / CI
 
-The orchestrate skill Phase 5 instructs agents to "write/merge scores into `.opencode/reviewer-knowledge.json`" but does not specify behavior when the file doesn't exist or contains malformed JSON. Consider adding explicit guidance:
-- Create the file if it doesn't exist (start from empty `{}`)
-- If malformed, back it up (e.g., `.opencode/reviewer-knowledge.json.bak`) before overwriting
+The CI workflow triggers on push to all branches (`["**"]`) combined with PR events, which causes redundant runs (one for the push, one for the PR). Consider either:
+- Restricting `push` triggers to `master` only (keeping full `pull_request` coverage), or
+- Adding `concurrency` controls to cancel redundant in-progress runs for the same branch
 
-**File:** `skills/orchestrate/SKILL.md`, Phase 5 / Reviewer Knowledge section
-
----
-
-## TODO-002: Align comment columns in AGENTS.md tree diagram
-
-**Source:** core-reviewer-1 (claude-sonnet-4.6) advisory, PR #3 Round 1  
-**Area:** docs  
-
-The `#` comment markers in the `AGENTS.md` repository structure tree are not column-aligned — filenames of different lengths cause the `#` to start at different columns (e.g., `SMOKE_TEST.md` vs `IMPLEMENTATION_PLAN.md` within `doc/`). Aligning all comment markers to a consistent column would improve readability.
-
-**File:** `AGENTS.md`, Repository Structure section
-
----
-
-## TODO-003: Add GitHub Actions CI workflow
-
-**Source:** reviewer-minimax advisory, PR #6 Round 1  
-**Area:** tests
-
-The pre-commit hook enforces `npm test` locally, but there is no CI workflow. Commits made via the GitHub web UI, PR merges from agents in worktrees that bypass the hook, or clones where `npm install` was not run will not have tests enforced. A `.github/workflows/ci.yml` running `npm test` on every push and PR would close this gap.
-
-**File:** `.github/workflows/ci.yml` (new)
+**File:** `.github/workflows/ci.yml`

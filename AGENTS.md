@@ -27,8 +27,8 @@ opencode-plugin-coding/
 │   ├── orchestrate/SKILL.md                # Full multi-agent workflow (~430 lines)
 │   ├── test-driven-development/SKILL.md    # RED-GREEN-REFACTOR cycle
 │   ├── systematic-debugging/SKILL.md       # 4-phase debugging
-│   ├── git-worktree/SKILL.md              # Worktree management
-│   └── playwright/SKILL.md                # MCP-based browser automation
+│   ├── git-worktree/SKILL.md               # Worktree management
+│   └── playwright/SKILL.md                 # MCP-based browser automation
 ├── templates/
 │   ├── workflow.json                       # Template for /zooplankton-coding-init
 │   ├── plan.md                             # Plan file template
@@ -38,7 +38,7 @@ opencode-plugin-coding/
 │   ├── SMOKE_TEST.md                       # Orchestrate flow smoke-test checklist
 │   └── TODO.md                             # Deferred advisory items from reviews
 ├── tests/
-│   └── opencode-plugin-coding.test.js     # Unit tests for the plugin JS (node:test)
+│   └── opencode-plugin-coding.test.js      # Unit tests for the plugin JS (node:test)
 ├── .husky/
 │   └── pre-commit                          # Runs npm test before every commit
 ├── package.json
