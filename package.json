@@ -5,6 +5,9 @@
   "type": "module",
   "main": ".opencode/plugins/opencode-plugin-coding.js",
   "license": "MIT",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
   "files": [
     ".opencode/plugins/",
     "commands/",
