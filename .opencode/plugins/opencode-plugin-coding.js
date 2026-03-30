@@ -181,10 +181,9 @@ const registerAgents = (config, directory) => {
     // Normalize: coreCoder is a single object, others are arrays
     const agentList = Array.isArray(entries) ? entries : [entries];
 
-    // Resolve GitHub account for this role: per-field key > default > none
-    // `field` matches workflow-local.json keys (coreCoder, coreReviewers, reviewers, securityReviewers)
+    // Resolve GitHub account for this role: roleKey > default > none
     const githubAccount =
-      githubAccountConfig[field] ||
+      githubAccountConfig[roleKey] ||
       githubAccountConfig.default ||
       null;
 

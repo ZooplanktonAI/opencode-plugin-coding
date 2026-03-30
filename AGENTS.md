@@ -102,13 +102,13 @@ Each user creates `.opencode/workflow-local.json` (gitignored) for user-specific
   "github": {
     "account": {
       "default": "pancake-zinc",
-      "reviewers": "panezhang"
+      "reviewer": "panezhang"
     }
   }
 }
 ```
 
-Keys under `github.account` match `workflow.json` agent field names: `coreCoder`, `coreReviewers`, `reviewers`, `securityReviewers`. The `default` key applies to all roles unless overridden. Resolution: per-role > default > none.
+Keys under `github.account` match the internal role names: `coreCoder`, `coreReviewer`, `reviewer`, `securityReviewer`. The `default` key applies to all roles unless overridden. Resolution: per-role > default > none.
 
 When set, agents are instructed to prefix all `gh` commands with `GH_TOKEN=$(gh auth token --user <account>)` to avoid conflicts between concurrent agents sharing the same `~/.config/gh/hosts.yml`.
 

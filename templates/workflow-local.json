@@ -3,9 +3,9 @@
     "account": {
       "default": "",
       "coreCoder": "",
-      "coreReviewers": "",
-      "reviewers": "",
-      "securityReviewers": ""
+      "coreReviewer": "",
+      "reviewer": "",
+      "securityReviewer": ""
     }
   }
 }

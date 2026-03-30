@@ -114,9 +114,9 @@ Ask the user which GitHub accounts they use for coding (commits, PRs) and review
     "account": {
       "default": "<primary GitHub account>",
       "coreCoder": "",
-      "coreReviewers": "",
-      "reviewers": "",
-      "securityReviewers": ""
+      "coreReviewer": "",
+      "reviewer": "",
+      "securityReviewer": ""
     }
   }
 }
@@ -124,9 +124,9 @@ Ask the user which GitHub accounts they use for coding (commits, PRs) and review
 
 - `default` applies to all agent roles unless overridden by a specific key
 - `coreCoder` overrides for the core implementation agent
-- `coreReviewers` overrides for core reviewers (worktree-based, blocking)
-- `reviewers` overrides for normal reviewers (diff-based, non-blocking)
-- `securityReviewers` overrides for security reviewers
+- `coreReviewer` overrides for core reviewers (worktree-based, blocking)
+- `reviewer` overrides for normal reviewers (diff-based, non-blocking)
+- `securityReviewer` overrides for security reviewers
 
 Leave per-role keys empty to inherit from `default`. Resolution: per-role > default > none.
 
