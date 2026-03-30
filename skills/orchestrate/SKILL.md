@@ -192,7 +192,7 @@ When sending feedback to `@<coreCoder>`, use the revision template (see Invocati
 After merge, produce a retrospective:
 
 1. **Write retrospective file** to `.opencode/retrospectives/<branch>.md` using `templates/retrospective.md`
-2. **Update reviewer knowledge** — write/merge scores into `.opencode/reviewer-knowledge.json` (see Reviewer Assignment Strategy)
+2. **Update reviewer knowledge** — write/merge scores into `.opencode/reviewer-knowledge.json` (see Reviewer Assignment Strategy). If the file doesn't exist, create it from scratch with an empty `"models": {}` object. If the file exists but contains malformed JSON, back it up to `.opencode/reviewer-knowledge.json.bak` before overwriting.
 3. **Propose AGENTS.md updates** — if the task revealed new gotchas, conventions, or architecture patterns, suggest changes as a diff. The user reviews and applies manually.
 4. **Set plan status to `completed`**
 5. **Run cleanup** (see Cleanup Policy)
