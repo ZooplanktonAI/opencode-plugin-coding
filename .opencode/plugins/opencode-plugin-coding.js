@@ -14,7 +14,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pluginRoot = path.resolve(__dirname, "../..");
 
 // Simple frontmatter extraction (no external dependencies)
-const extractFrontmatter = (content) => {
+export const extractFrontmatter = (content) => {
   const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if (!match) return { meta: {}, body: content };
 
@@ -34,7 +34,7 @@ const extractFrontmatter = (content) => {
 };
 
 // Load all command .md files from commands/ and register them via config
-const loadCommands = () => {
+export const loadCommands = () => {
   const commandsDir = path.join(pluginRoot, "commands");
   if (!fs.existsSync(commandsDir)) return {};
 
@@ -56,14 +56,14 @@ const loadCommands = () => {
 };
 
 // Read a guide file and return its content as a prompt string
-const readGuide = (filename) => {
+export const readGuide = (filename) => {
   const guidePath = path.join(pluginRoot, "guides", filename);
   if (!fs.existsSync(guidePath)) return "";
   return fs.readFileSync(guidePath, "utf8").trim();
 };
 
 // Read workflow.json from the project directory
-const readWorkflowJson = (directory) => {
+export const readWorkflowJson = (directory) => {
   const workflowPath = path.join(directory, ".opencode", "workflow.json");
   if (!fs.existsSync(workflowPath)) return null;
   try {
@@ -74,7 +74,7 @@ const readWorkflowJson = (directory) => {
 };
 
 // Read workflow-local.json (gitignored, user-specific overrides)
-const readWorkflowLocalJson = (directory) => {
+export const readWorkflowLocalJson = (directory) => {
   const localPath = path.join(directory, ".opencode", "workflow-local.json");
   if (!fs.existsSync(localPath)) return null;
   try {
@@ -159,11 +159,11 @@ const ROLE_STEP_DEFAULTS = {
 
 // Build a GitHub account prompt suffix for agents that have an assigned account.
 // Uses inline GH_TOKEN per-command to avoid concurrent agent conflicts on shared gh config.
-const buildGithubAccountPrompt = (account) =>
+export const buildGithubAccountPrompt = (account) =>
   `\n\n## GitHub Account\n\nYou are operating as GitHub user \`${account}\`. **Every** \`gh\` command you run must be prefixed with an inline token to avoid conflicts with other concurrent agents:\n\`\`\`sh\nGH_TOKEN=$(gh auth token --user ${account}) gh <subcommand> ...\n\`\`\`\nNever use \`gh auth switch\`. Always use the inline \`GH_TOKEN=...\` prefix pattern shown above.`;
 
 // Register agents from workflow.json into cfg.agent
-const registerAgents = (config, directory) => {
+export const registerAgents = (config, directory) => {
   const workflow = readWorkflowJson(directory);
   if (!workflow?.agents) return;
 
