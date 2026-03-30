@@ -1,0 +1,11 @@
+{
+  "github": {
+    "account": {
+      "default": "",
+      "coreCoder": "",
+      "coreReviewer": "",
+      "reviewer": "",
+      "securityReviewer": ""
+    }
+  }
+}

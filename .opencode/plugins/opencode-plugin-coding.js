@@ -73,6 +73,17 @@ const readWorkflowJson = (directory) => {
   }
 };
 
+// Read workflow-local.json (gitignored, user-specific overrides)
+const readWorkflowLocalJson = (directory) => {
+  const localPath = path.join(directory, ".opencode", "workflow-local.json");
+  if (!fs.existsSync(localPath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(localPath, "utf8"));
+  } catch {
+    return null;
+  }
+};
+
 // Agent role definitions: guide file, description, and permissions
 const AGENT_ROLES = {
   coreCoder: {
@@ -146,21 +157,35 @@ const ROLE_STEP_DEFAULTS = {
   securityReviewer: 120,
 };
 
+// Build a GitHub account prompt suffix for agents that have an assigned account.
+// Uses inline GH_TOKEN per-command to avoid concurrent agent conflicts on shared gh config.
+const buildGithubAccountPrompt = (account) =>
+  `\n\n## GitHub Account\n\nYou are operating as GitHub user \`${account}\`. **Every** \`gh\` command you run must be prefixed with an inline token to avoid conflicts with other concurrent agents:\n\`\`\`sh\nGH_TOKEN=$(gh auth token --user ${account}) gh <subcommand> ...\n\`\`\`\nNever use \`gh auth switch\`. Always use the inline \`GH_TOKEN=...\` prefix pattern shown above.`;
+
 // Register agents from workflow.json into cfg.agent
 const registerAgents = (config, directory) => {
   const workflow = readWorkflowJson(directory);
   if (!workflow?.agents) return;
 
+  const local = readWorkflowLocalJson(directory);
+  const githubAccountConfig = local?.github?.account || {};
+
   config.agent = config.agent || {};
 
   for (const [field, roleKey] of Object.entries(FIELD_TO_ROLE)) {
     const role = AGENT_ROLES[roleKey];
-    const prompt = readGuide(role.guide);
+    const basePrompt = readGuide(role.guide);
     const entries = workflow.agents[field];
     if (!entries) continue;
 
     // Normalize: coreCoder is a single object, others are arrays
     const agentList = Array.isArray(entries) ? entries : [entries];
+
+    // Resolve GitHub account for this role: roleKey > default > none
+    const githubAccount =
+      githubAccountConfig[roleKey] ||
+      githubAccountConfig.default ||
+      null;
 
     for (const agent of agentList) {
       // Support both { name, model } objects and bare strings (backward compat)
@@ -171,6 +196,10 @@ const registerAgents = (config, directory) => {
 
       // Don't override user-defined agents
       if (config.agent[name]) continue;
+
+      const prompt = githubAccount
+        ? basePrompt + buildGithubAccountPrompt(githubAccount)
+        : basePrompt;
 
       const agentConfig = {
         description: role.description,
