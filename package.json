@@ -1,6 +1,6 @@
 {
   "name": "opencode-plugin-coding",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A shared OpenCode plugin for multi-agent software development workflows: brainstorm, plan, orchestrate, review, debug.",
   "type": "module",
   "main": ".opencode/plugins/opencode-plugin-coding.js",

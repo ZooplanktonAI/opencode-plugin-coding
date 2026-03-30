@@ -140,6 +140,12 @@ const FIELD_TO_ROLE = {
   securityReviewers: "securityReviewer",
 };
 
+// Default step limits per role (overridable per-agent via workflow.json `steps` field)
+const ROLE_STEP_DEFAULTS = {
+  reviewer: 80,
+  securityReviewer: 120,
+};
+
 // Register agents from workflow.json into cfg.agent
 const registerAgents = (config, directory) => {
   const workflow = readWorkflowJson(directory);
@@ -176,6 +182,15 @@ const registerAgents = (config, directory) => {
       // Only set model if explicitly provided (non-empty)
       if (model) {
         agentConfig.model = model;
+      }
+
+      // Apply steps: use per-agent value from workflow.json if present, else role default
+      const agentSteps =
+        typeof agent === "object" && agent.steps != null
+          ? agent.steps
+          : ROLE_STEP_DEFAULTS[roleKey];
+      if (agentSteps != null) {
+        agentConfig.steps = agentSteps;
       }
 
       config.agent[name] = agentConfig;

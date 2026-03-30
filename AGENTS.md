@@ -91,7 +91,7 @@ No symlinks are used. Consumer projects install via `"plugin"` array in `opencod
 
 ### workflow.json
 
-Each consumer project has `.opencode/workflow.json` with project-specific settings. The `agents` section stores `{ name, model }` objects. The plugin reads these to dynamically register agents with the correct model, permissions (from role), and prompt (from guide file).
+Each consumer project has `.opencode/workflow.json` with project-specific settings. The `agents` section stores `{ name, model, steps? }` objects. The plugin reads these to dynamically register agents with the correct model, permissions (from role), and prompt (from guide file). The optional `steps` field caps the agent's maximum agentic iterations; reviewer agents default to `80` and security-reviewer agents default to `120` if unset.
 
 ## Gotchas
 
