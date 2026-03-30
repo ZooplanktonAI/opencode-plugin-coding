@@ -146,9 +146,10 @@ const ROLE_STEP_DEFAULTS = {
   securityReviewer: 120,
 };
 
-// Build a GitHub account prompt suffix for agents that have an assigned account
+// Build a GitHub account prompt suffix for agents that have an assigned account.
+// Uses inline GH_TOKEN per-command to avoid concurrent agent conflicts on shared gh config.
 const buildGithubAccountPrompt = (account) =>
-  `\n\n## GitHub Account\n\nYou are operating as GitHub user \`${account}\`. Before running any \`gh\` command, first switch to this account:\n\`\`\`sh\ngh auth switch --user ${account}\n\`\`\`\nRun this once at the start of your session. If you see an auth error, re-run the switch command.`;
+  `\n\n## GitHub Account\n\nYou are operating as GitHub user \`${account}\`. **Every** \`gh\` command you run must be prefixed with an inline token to avoid conflicts with other concurrent agents:\n\`\`\`sh\nGH_TOKEN=$(gh auth token --user ${account}) gh <subcommand> ...\n\`\`\`\nNever use \`gh auth switch\`. Always use the inline \`GH_TOKEN=...\` prefix pattern shown above.`;
 
 // Register agents from workflow.json into cfg.agent
 const registerAgents = (config, directory) => {
