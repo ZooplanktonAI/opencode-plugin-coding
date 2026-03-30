@@ -12,7 +12,7 @@
   "commands": {
     "build": "",
     "lint": "",
-    "test": "",
+    "test": "npm test",
     "typecheck": ""
   },
   "agents": {
