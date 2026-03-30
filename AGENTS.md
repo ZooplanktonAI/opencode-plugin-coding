@@ -93,6 +93,25 @@ No symlinks are used. Consumer projects install via `"plugin"` array in `opencod
 
 Each consumer project has `.opencode/workflow.json` with project-specific settings. The `agents` section stores `{ name, model, steps? }` objects. The plugin reads these to dynamically register agents with the correct model, permissions (from role), and prompt (from guide file). The optional `steps` field caps the agent's maximum agentic iterations; reviewer agents default to `80` and security-reviewer agents default to `120` if unset.
 
+### workflow-local.json
+
+Each user creates `.opencode/workflow-local.json` (gitignored) for user-specific settings. Currently supports GitHub account mapping:
+
+```json
+{
+  "github": {
+    "account": {
+      "default": "pancake-zinc",
+      "reviewer": "panezhang"
+    }
+  }
+}
+```
+
+Keys under `github.account` match the internal role names: `coreCoder`, `coreReviewer`, `reviewer`, `securityReviewer`. The `default` key applies to all roles unless overridden. Resolution: per-role > default > none.
+
+When set, agents are instructed to prefix all `gh` commands with `GH_TOKEN=$(gh auth token --user <account>)` to avoid conflicts between concurrent agents sharing the same `~/.config/gh/hosts.yml`.
+
 ## Gotchas
 
 - **`package.json` main** points to `.opencode/plugins/opencode-plugin-coding.js` — this is intentional for the plugin system, not a mistake.
@@ -110,4 +129,5 @@ When reviewing changes to this repo:
 - Verify cross-file references (command names, config field names, agent names, guide paths)
 - Check that plugin JS permission maps match the permission table above
 - Ensure workflow.json template and self-hosted config use `{ name, model }` objects
+- Confirm `github.account` in `workflow-local.json` maps correctly: keys match workflow.json agent fields, resolution is per-role > default > none
 - Confirm guide files are self-consistent with skills that reference them
