@@ -23,7 +23,7 @@
       { "name": "core-reviewer-secondary", "model": "" }
     ],
     "reviewers": [
-      { "name": "reviewer-glm", "model": "" }
+      { "name": "reviewer-glm", "model": "", "steps": 80 }
     ],
     "securityReviewers": []
   },

@@ -47,6 +47,8 @@ gh api repos/<REPO>/contents/AGENTS.md --jq '.content' | base64 -d
 
 Also read any files from `workflow.json` → `docsToRead` and any additional files passed by the orchestrator, using the same `gh api ... contents/<path>` pattern.
 
+> **Step budget:** Read AGENTS.md and `docsToRead` files once and move on. Fetch each document a single time — do not re-fetch or loop over already-read files. The PR diff (Step 2) is your primary source. Once you have enough context to assess the changes, proceed immediately to Step 2.
+
 ### Step 2: Read the PR
 
 ```bash
