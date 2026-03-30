@@ -110,15 +110,25 @@ Ask the user which GitHub accounts they use for coding (commits, PRs) and review
 
 ```json
 {
-  "githubAccount": {
-    "coder": "<user's coding account>",
-    "reviewer": "<user's review account>"
+  "github": {
+    "account": {
+      "default": "<primary GitHub account>",
+      "coreCoder": "",
+      "coreReviewers": "",
+      "reviewers": "",
+      "securityReviewers": ""
+    }
   }
 }
 ```
 
-- `coder` is used by `coreCoder` and `coreReviewers` — agents that commit, push, and create PRs
-- `reviewer` is used by `reviewers` and `securityReviewers` — agents that post review comments
+- `default` applies to all agent roles unless overridden by a specific key
+- `coreCoder` overrides for the core implementation agent
+- `coreReviewers` overrides for core reviewers (worktree-based, blocking)
+- `reviewers` overrides for normal reviewers (diff-based, non-blocking)
+- `securityReviewers` overrides for security reviewers
+
+Leave per-role keys empty to inherit from `default`. Resolution: per-role > default > none.
 
 If `.opencode/workflow-local.json` already exists, warn the user and ask before overwriting.
 

@@ -99,15 +99,16 @@ Each user creates `.opencode/workflow-local.json` (gitignored) for user-specific
 
 ```json
 {
-  "githubAccount": {
-    "coder": "pancake-zinc",
-    "reviewer": "panezhang"
+  "github": {
+    "account": {
+      "default": "pancake-zinc",
+      "reviewers": "panezhang"
+    }
   }
 }
 ```
 
-- `coder` → used by `coreCoder` and `coreReviewers` (commit, push, create PRs)
-- `reviewer` → used by `reviewers` and `securityReviewers` (post review comments)
+Keys under `github.account` match `workflow.json` agent field names: `coreCoder`, `coreReviewers`, `reviewers`, `securityReviewers`. The `default` key applies to all roles unless overridden. Resolution: per-role > default > none.
 
 When set, agents are instructed to prefix all `gh` commands with `GH_TOKEN=$(gh auth token --user <account>)` to avoid conflicts between concurrent agents sharing the same `~/.config/gh/hosts.yml`.
 
@@ -128,5 +129,5 @@ When reviewing changes to this repo:
 - Verify cross-file references (command names, config field names, agent names, guide paths)
 - Check that plugin JS permission maps match the permission table above
 - Ensure workflow.json template and self-hosted config use `{ name, model }` objects
-- Confirm `githubAccount` in `workflow-local.json` maps correctly: `coder` → coreCoder/coreReviewers, `reviewer` → reviewers/securityReviewers
+- Confirm `github.account` in `workflow-local.json` maps correctly: keys match workflow.json agent fields, resolution is per-role > default > none
 - Confirm guide files are self-consistent with skills that reference them

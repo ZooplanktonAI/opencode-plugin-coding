@@ -84,12 +84,13 @@ const readWorkflowLocalJson = (directory) => {
   }
 };
 
-// Map agent roles to githubAccount keys in workflow-local.json
+// Map agent roles to github.account keys in workflow-local.json
+// Resolution: per-role key (e.g. "coreCoder") > "default" > none
 const ROLE_TO_ACCOUNT_KEY = {
-  coreCoder: "coder",
-  coreReviewer: "coder",
-  reviewer: "reviewer",
-  securityReviewer: "reviewer",
+  coreCoder: "coreCoder",
+  coreReviewer: "coreReviewers",
+  reviewer: "reviewers",
+  securityReviewer: "securityReviewers",
 };
 
 // Agent role definitions: guide file, description, and permissions
@@ -176,7 +177,7 @@ const registerAgents = (config, directory) => {
   if (!workflow?.agents) return;
 
   const local = readWorkflowLocalJson(directory);
-  const githubAccounts = local?.githubAccount || {};
+  const githubAccountConfig = local?.github?.account || {};
 
   config.agent = config.agent || {};
 
@@ -189,9 +190,12 @@ const registerAgents = (config, directory) => {
     // Normalize: coreCoder is a single object, others are arrays
     const agentList = Array.isArray(entries) ? entries : [entries];
 
-    // Resolve GitHub account for this role from workflow-local.json
+    // Resolve GitHub account for this role: per-role key > default > none
     const accountKey = ROLE_TO_ACCOUNT_KEY[roleKey];
-    const githubAccount = accountKey ? githubAccounts[accountKey] : null;
+    const githubAccount =
+      (accountKey && githubAccountConfig[accountKey]) ||
+      githubAccountConfig.default ||
+      null;
 
     for (const agent of agentList) {
       // Support both { name, model } objects and bare strings (backward compat)
