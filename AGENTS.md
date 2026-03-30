@@ -133,10 +133,12 @@ The plugin JS is unit-tested using Node.js built-in `node:test` (zero extra depe
 
 ```bash
 npm test          # run once
-npm run prepare   # (re-)install the husky pre-commit hook after a fresh clone
+npm run prepare   # (re-)install the hook if it was lost
 ```
 
 The pre-commit hook (`.husky/pre-commit`) runs `npm test` automatically before every commit. After a fresh clone run `npm install` — this triggers the `prepare` script which installs the hook.
+
+To bypass in an emergency: `git commit --no-verify` or set `HUSKY=0` in the environment.
 
 ### Test file
 
