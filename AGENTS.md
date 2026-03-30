@@ -37,6 +37,10 @@ opencode-plugin-coding/
 │   ├── IMPLEMENTATION_PLAN.md              # Canonical implementation roadmap
 │   ├── SMOKE_TEST.md                       # Orchestrate flow smoke-test checklist
 │   └── TODO.md                             # Deferred advisory items from reviews
+├── tests/
+│   └── opencode-plugin-coding.test.js     # Unit tests for the plugin JS (node:test)
+├── .husky/
+│   └── pre-commit                          # Runs npm test before every commit
 ├── package.json
 ├── README.md
 ├── INSTALL.md                              # Installation guide for consumer projects
@@ -121,7 +125,41 @@ When set, agents are instructed to prefix all `gh` commands with `GH_TOKEN=$(gh 
 - **Use `<<'EOF'` (single-quoted)** in heredocs within skill/guide bash examples to prevent shell variable expansion inside JSON.
 - **No agent `.md` files in consumer projects** — agents are registered dynamically. If you see references to `.opencode/agents/*.md` in consumer projects, those are stale artifacts from before the architecture change.
 - **Session reuse across review rounds** — the orchestrate skill recommends passing `task_id` to resume reviewer sessions across rounds, so reviewers retain context. If a resumed session fails, fall back to a fresh session.
-- **Orchestrate smoke test** — to validate the full orchestrate flow in this repo, see `doc/SMOKE_TEST.md`. Use a trivial change (e.g., docs tweak) and run all 5 phases. Note that this repo has no build/lint/test/typecheck commands configured in `.opencode/workflow.json`, so verification steps will report "N/A — not configured."
+- **Orchestrate smoke test** — to validate the full orchestrate flow in this repo, see `doc/SMOKE_TEST.md`. Use a trivial change (e.g., docs tweak) and run all 5 phases. Note that only `test` (`npm test`) is configured in `.opencode/workflow.json`; build, lint, and typecheck will report "N/A — not configured."
+
+## Testing
+
+The plugin JS is unit-tested using Node.js built-in `node:test` (zero extra dependencies).
+
+```bash
+npm test          # run once
+npm run prepare   # (re-)install the husky pre-commit hook after a fresh clone
+```
+
+The pre-commit hook (`.husky/pre-commit`) runs `npm test` automatically before every commit. After a fresh clone run `npm install` — this triggers the `prepare` script which installs the hook.
+
+### Test file
+
+`tests/opencode-plugin-coding.test.js` — 46 tests across 8 suites covering all exported functions:
+
+| Suite | What it covers |
+|-------|---------------|
+| `extractFrontmatter` | No frontmatter, valid meta, quoted values, colon-in-value, empty body/meta |
+| `buildGithubAccountPrompt` | Account name, GH_TOKEN pattern, auth-switch warning |
+| `readWorkflowJson` | Missing file, invalid JSON, valid parse |
+| `readWorkflowLocalJson` | Same as above |
+| `readGuide` | Missing file, existing file (trimmed) |
+| `loadCommands` | Key naming, required fields, optional agent/model fields, frontmatter parsing |
+| `registerAgents` | All code paths: object/array/string entries, GitHub account resolution, steps defaults, permissions for all 4 roles, user-override protection |
+| `ZooplanktonCodingPlugin` | Skills path, commands, agents, idempotency, override protection |
+
+### Test gotchas
+
+- **Name test files after their source file.** Use `opencode-plugin-coding.test.js` for `opencode-plugin-coding.js`, not a generic name like `plugin.test.js`.
+- **Use `assert.ok(!("key" in obj))` to verify key absence**, not `assert.equal(obj.key, undefined)`. The latter passes even when the key exists with value `undefined` — it doesn't actually verify the key is absent.
+- **When a function has multiple code paths** (e.g., bare string vs object agent entry), test key-absence and other negative assertions for *both* paths, not just one.
+
+---
 
 ## Review Focus
 
