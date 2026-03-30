@@ -60,7 +60,7 @@ All content files are markdown (`.md`). The only JS file is the plugin entry poi
 
 Agents are **dynamically registered** by the plugin JS via OpenCode's `config.agent` API. There are no `.opencode/agents/*.md` files in consumer projects. The plugin reads:
 
-1. **workflow.json** → `agents` section for `{ name, model }` definitions
+1. **workflow.json** → `agents` section for `{ name, model, githubAccount? }` definitions + root-level `githubAccount?` default
 2. **guides/*.md** for prompt content (used as the agent's `prompt` field)
 3. **Hardcoded permission maps** in the plugin JS (matching the source of truth table below)
 
@@ -91,7 +91,9 @@ No symlinks are used. Consumer projects install via `"plugin"` array in `opencod
 
 ### workflow.json
 
-Each consumer project has `.opencode/workflow.json` with project-specific settings. The `agents` section stores `{ name, model, steps? }` objects. The plugin reads these to dynamically register agents with the correct model, permissions (from role), and prompt (from guide file). The optional `steps` field caps the agent's maximum agentic iterations; reviewer agents default to `80` and security-reviewer agents default to `120` if unset.
+Each consumer project has `.opencode/workflow.json` with project-specific settings. The `agents` section stores `{ name, model, steps?, githubAccount? }` objects. The plugin reads these to dynamically register agents with the correct model, permissions (from role), and prompt (from guide file). The optional `steps` field caps the agent's maximum agentic iterations; reviewer agents default to `80` and security-reviewer agents default to `120` if unset.
+
+The optional `githubAccount` field controls which GitHub account an agent uses for `gh` commands. It can be set at the root level of `workflow.json` as a default for all agents, and overridden per-agent. When set, the plugin appends a prompt instruction telling the agent to run `gh auth switch --user <account>` at session start.
 
 ## Gotchas
 
@@ -110,4 +112,5 @@ When reviewing changes to this repo:
 - Verify cross-file references (command names, config field names, agent names, guide paths)
 - Check that plugin JS permission maps match the permission table above
 - Ensure workflow.json template and self-hosted config use `{ name, model }` objects
+- Confirm `githubAccount` resolution order: per-agent > root default > none
 - Confirm guide files are self-consistent with skills that reference them

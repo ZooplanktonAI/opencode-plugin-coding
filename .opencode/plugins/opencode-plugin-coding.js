@@ -146,16 +146,22 @@ const ROLE_STEP_DEFAULTS = {
   securityReviewer: 120,
 };
 
+// Build a GitHub account prompt suffix for agents that have an assigned account
+const buildGithubAccountPrompt = (account) =>
+  `\n\n## GitHub Account\n\nYou are operating as GitHub user \`${account}\`. Before running any \`gh\` command, first switch to this account:\n\`\`\`sh\ngh auth switch --user ${account}\n\`\`\`\nRun this once at the start of your session. If you see an auth error, re-run the switch command.`;
+
 // Register agents from workflow.json into cfg.agent
 const registerAgents = (config, directory) => {
   const workflow = readWorkflowJson(directory);
   if (!workflow?.agents) return;
 
+  const defaultGithubAccount = workflow.githubAccount || null;
+
   config.agent = config.agent || {};
 
   for (const [field, roleKey] of Object.entries(FIELD_TO_ROLE)) {
     const role = AGENT_ROLES[roleKey];
-    const prompt = readGuide(role.guide);
+    const basePrompt = readGuide(role.guide);
     const entries = workflow.agents[field];
     if (!entries) continue;
 
@@ -171,6 +177,14 @@ const registerAgents = (config, directory) => {
 
       // Don't override user-defined agents
       if (config.agent[name]) continue;
+
+      // Resolve GitHub account: per-agent override > root default
+      const githubAccount =
+        (typeof agent === "object" && agent.githubAccount) ||
+        defaultGithubAccount;
+      const prompt = githubAccount
+        ? basePrompt + buildGithubAccountPrompt(githubAccount)
+        : basePrompt;
 
       const agentConfig = {
         description: role.description,
