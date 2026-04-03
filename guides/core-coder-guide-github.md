@@ -1,4 +1,4 @@
-# Core Coder Guide
+# Core Coder Guide (GitHub Mode)
 
 Instructions for the core implementation agent (`core-coder`). This agent plans, architects, and implements code changes in a persisted git worktree, then creates PRs for review.
 

@@ -1,4 +1,4 @@
-# Core Reviewer Guide
+# Core Reviewer Guide (GitHub Mode)
 
 Applies to all core reviewer agents (e.g., `core-reviewer-primary`, `core-reviewer-secondary`).
 

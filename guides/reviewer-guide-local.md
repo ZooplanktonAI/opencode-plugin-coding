@@ -11,7 +11,7 @@ Normal reviewers perform diff-based code review using git commands and the `read
 **Allowed bash commands only:**
 
 ```
-git diff *    git log *
+git diff *    git log *    git fetch *
 ```
 
 No `gh` commands are available. Use the `read` tool to access file contents directly from the filesystem.

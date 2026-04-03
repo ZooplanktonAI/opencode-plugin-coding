@@ -95,7 +95,7 @@ This means:
 | normal reviewer | deny | `'*': deny` + `gh`/`git` allowlist | allow | deny |
 | security reviewer | deny | `'*': deny` + `gh`/`git` allowlist | allow | deny |
 
-Normal/security reviewer bash allowlist: `gh api *`, `gh pr diff *`, `gh pr view *`, `gh pr checks *`, `git diff *`, `git log *`. The `gh` entries are used in GitHub mode; the `git` entries are used in local mode. Both are always present — guides instruct agents which to use based on platform.
+Normal/security reviewer bash allowlist: `gh api *`, `gh pr diff *`, `gh pr view *`, `gh pr checks *`, `git diff *`, `git log *`, `git fetch *`. The `gh` entries are used in GitHub mode; the `git` entries are used in local mode. Both are always present — guides instruct agents which to use based on platform.
 
 ### Plugin mechanism
 
@@ -133,7 +133,7 @@ When set, agents are instructed to prefix all `gh` commands with `GH_TOKEN=$(gh 
 
 The plugin supports two platform modes: `github` and `local`. The platform is set in `workflow.json` → `project.platform`.
 
-**Auto-detection** (if `platform` is absent or empty): if `project.repo` is non-empty and looks like a GitHub slug (`Org/repo` or contains `github.com`), use `github`; otherwise use `local`.
+**Auto-detection** (if `platform` is absent or empty): if `project.repo` is non-empty and contains `github.com`, use `github`; otherwise use `local`. A bare `Org/repo` slug alone is not sufficient — GitLab and Bitbucket also use this pattern. GitHub Enterprise instances with custom domains should set `platform: "github"` explicitly.
 
 **How it works:** Each guide file and the orchestrate skill are **dispatcher files** at their original paths (e.g., `guides/core-coder-guide.md`, `skills/orchestrate/SKILL.md`). The dispatcher reads `project.platform`, applies auto-detection if needed, and loads the correct variant:
 - `-github.md` — full GitHub API integration (PRs, review comments via `gh api`, squash merge)

@@ -13,6 +13,7 @@ The security reviewer provides a focused security analysis of the code changes o
 ## Critical Constraints
 
 - **No GitHub API:** Do not use `gh` commands. Read files from the worktree or via git diff.
+- **Allowed git commands:** `git diff *`, `git log *`, `git fetch *`. Use the `read` tool for direct file access.
 - **Substitute all placeholders:** `BRANCH`, `MODEL_ID` are templates. Replace with actual values.
 - **Timing:** Pre-merge only (runs after code-review rounds converge, immediately before merge decision)
 

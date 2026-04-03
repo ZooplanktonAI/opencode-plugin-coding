@@ -27,6 +27,7 @@ Determine whether this project should use `github` or `local` mode:
    - If the URL matches a GitHub pattern — SSH (`git@github.com:Org/repo.git`) or HTTPS (`https://github.com/Org/repo.git`) — set `platform` to `"github"`
    - If the URL is a non-GitHub remote (e.g., GitLab, Bitbucket, self-hosted) — set `platform` to `"local"`
    - If no remote exists (`git remote get-url origin` fails) — set `platform` to `"local"`
+   - **Note:** GitHub Enterprise instances with custom domains (not `github.com`) will auto-detect as `local`. Users should set `platform: "github"` manually in `workflow.json` if they want the full GitHub API workflow.
 2. **Manual override:** The user can always change `project.platform` in `workflow.json` after init. Document this in the summary output.
 
 ### Stack detection

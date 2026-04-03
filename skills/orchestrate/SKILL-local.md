@@ -36,7 +36,7 @@ Read `.opencode/workflow.json` at the start of every orchestration. Key fields:
 - `docsToRead` — files all agents must read before working
 - `reviewFocus` — array of short emphasis labels (e.g., `"type safety"`, `"module boundaries"`); reviewers look up detailed rules in `docsToRead` files
 
-**Note:** `project.repo` may be empty or absent in local mode. Do not assume a GitHub remote exists.
+**Note:** Local mode requires a git remote named `origin` (for `git fetch`, `git push`, etc.) but does not use the GitHub API or `gh` CLI. If `origin` is unreachable, `git push` and `git fetch` commands will fail — ensure the remote is configured and accessible. GitHub Enterprise instances with custom domains should set `platform: "github"` explicitly if they want the full GitHub API workflow.
 
 ---
 
@@ -416,7 +416,7 @@ After the user approves, merge and clean up:
 ```bash
 git checkout <defaultBranch> && git pull --ff-only origin <defaultBranch>
 git merge --no-ff $BRANCH -m "feat: <description>"
-git push origin <defaultBranch>
+git push origin <defaultBranch> || true
 # Detach all worktrees (coreCoder.name + each entry.name in agents.coreReviewers)
 git -C .worktrees/<coreCoder.name> checkout --detach HEAD
 # For each entry in agents.coreReviewers:
@@ -425,7 +425,7 @@ git branch -D $BRANCH
 # No remote branch delete — remote may not exist or branch may not be pushed
 ```
 
-If `--ff-only` fails: `git reset --hard origin/<defaultBranch>`.
+If `--ff-only` fails: `git reset --hard origin/<defaultBranch>`. Note: this requires `origin` to be reachable. If `origin` is unreachable, resolve manually or use `git log` to find the correct base commit.
 
 **Note:** For projects that require a pre-merge build (e.g., Electron apps), check the project's `AGENTS.md` for build-before-merge instructions. The orchestrator should follow project-specific merge rules when they exist.
 

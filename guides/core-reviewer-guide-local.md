@@ -9,6 +9,7 @@ Core reviewers differ from normal reviewers in three ways: worktree checkout, fu
 ## Critical Constraints
 
 - **No GitHub API:** Do not use `gh` commands. All findings are returned as structured text.
+- **Allowed git commands:** `git fetch`, `git checkout`, `git diff`, `git log`, and other read-only git operations. Core reviewers have full bash access in their worktrees.
 - **Substitute all placeholders:** `BRANCH`, `ROUND`, `MODEL_ID` are templates. Replace with actual values.
 - **Worktrees:** Each core reviewer uses `.worktrees/<own-agent-name>` (e.g., `core-reviewer-primary` uses `.worktrees/core-reviewer-primary`).
 
@@ -120,7 +121,7 @@ Return exactly this structured format:
 **Advisory issues:** N
 1. [file:line] <description>
 
-**Cross-reviewer notes:** <missed issues / false positives / false negatives from other reviewers, or "None">
+**Cross-reviewer notes:** <missed issues / false positives / false negatives from other reviewers, or "None" (Round 1: always "None")>
 
 **(Round > 1) Prior issue resolution:**
 1. [ADDRESSED / PARTIALLY ADDRESSED / NOT ADDRESSED] <prior issue description>
