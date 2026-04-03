@@ -174,7 +174,15 @@ export const detectPlatform = (workflow) => {
   const explicit = workflow?.project?.platform;
   if (explicit === "github" || explicit === "local") return explicit;
   const repo = workflow?.project?.repo || "";
-  return repo.includes("github.com") ? "github" : "local";
+  if (repo.includes("github.com")) return "github";
+  // Check GitHub Enterprise custom domains
+  const gheHosts = workflow?.project?.githubEnterpriseHosts;
+  if (Array.isArray(gheHosts)) {
+    for (const host of gheHosts) {
+      if (typeof host === "string" && host && repo.includes(host)) return "github";
+    }
+  }
+  return "local";
 };
 
 // Register agents from workflow.json into cfg.agent

@@ -101,7 +101,8 @@ After `/zooplankton-coding-init`, your project will have:
     "name": "my-project",
     "repo": "Org/my-project",
     "defaultBranch": "master",
-    "platform": "github"
+    "platform": "github",
+    "githubEnterpriseHosts": []
   },
   "stack": {
     "language": "typescript",

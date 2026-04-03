@@ -221,6 +221,54 @@ describe("detectPlatform", () => {
       "local"
     );
   });
+
+  it("auto-detects 'github' when repo matches a githubEnterpriseHosts entry", () => {
+    assert.equal(
+      detectPlatform({
+        project: {
+          repo: "https://github.mycompany.com/Org/repo",
+          githubEnterpriseHosts: ["github.mycompany.com"],
+        },
+      }),
+      "github"
+    );
+  });
+
+  it("auto-detects 'local' when repo does not match any githubEnterpriseHosts entry", () => {
+    assert.equal(
+      detectPlatform({
+        project: {
+          repo: "https://gitlab.mycompany.com/Org/repo",
+          githubEnterpriseHosts: ["github.mycompany.com"],
+        },
+      }),
+      "local"
+    );
+  });
+
+  it("ignores githubEnterpriseHosts when it is not an array", () => {
+    assert.equal(
+      detectPlatform({
+        project: {
+          repo: "https://github.mycompany.com/Org/repo",
+          githubEnterpriseHosts: "github.mycompany.com",
+        },
+      }),
+      "local"
+    );
+  });
+
+  it("ignores non-string entries in githubEnterpriseHosts", () => {
+    assert.equal(
+      detectPlatform({
+        project: {
+          repo: "https://github.mycompany.com/Org/repo",
+          githubEnterpriseHosts: [null, 123, "", "github.mycompany.com"],
+        },
+      }),
+      "github"
+    );
+  });
 });
 
 describe("loadCommands", () => {

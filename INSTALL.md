@@ -228,7 +228,8 @@ The plugin supports a `local` platform mode for repos that don't use GitHub (or 
 ### How platform is determined
 
 1. The `/zooplankton-coding-init` command auto-detects: GitHub remote → `"github"`, otherwise → `"local"`
-2. You can override manually in `workflow.json` → `project.platform`
+2. GitHub Enterprise instances with custom domains are detected via the `project.githubEnterpriseHosts` array in `workflow.json`. Add your GHE hostname (e.g., `"github.mycompany.com"`) to enable auto-detection.
+3. You can override manually in `workflow.json` → `project.platform`
 
 ### What's different in local mode
 

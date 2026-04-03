@@ -130,7 +130,7 @@ When set, agents are instructed to prefix all `gh` commands with `GH_TOKEN=$(gh 
 
 The plugin supports two platform modes: `github` and `local`. The platform is set in `workflow.json` → `project.platform`.
 
-**Auto-detection** (if `platform` is absent or empty): if `project.repo` is non-empty and contains `github.com`, use `github`; otherwise use `local`. A bare `Org/repo` slug alone is not sufficient — GitLab and Bitbucket also use this pattern. GitHub Enterprise instances with custom domains should set `platform: "github"` explicitly.
+**Auto-detection** (if `platform` is absent or empty): if `project.repo` is non-empty and contains `github.com`, use `github`. If it doesn't match `github.com` but matches any hostname in `project.githubEnterpriseHosts`, also use `github`. Otherwise use `local`. A bare `Org/repo` slug alone is not sufficient — GitLab and Bitbucket also use this pattern.
 
 **How it works:** The plugin JS reads `project.platform` from `workflow.json` at registration time and selects the correct `-github` or `-local` guide variant as the agent's prompt. No runtime file resolution is needed — the platform-specific guide content is injected directly into the agent config at startup. For the orchestrate skill, a thin dispatcher file at `skills/orchestrate/SKILL.md` reads `project.platform` and redirects the orchestrator to the correct variant (`SKILL-github.md` or `SKILL-local.md`). The orchestrator has read access to both files.
 
@@ -151,6 +151,7 @@ The plugin JS always loads the platform-specific guide variant at registration t
 - **Session reuse across review rounds** — the orchestrate skill recommends passing `task_id` to resume reviewer sessions across rounds, so reviewers retain context. If a resumed session fails, fall back to a fresh session.
 - **Orchestrate smoke test** — to validate the full orchestrate flow in this repo, see `doc/SMOKE_TEST.md`. Use a trivial change (e.g., docs tweak) and run all 5 phases. Note that only `test` (`npm test`) is configured in `.opencode/workflow.json`; build, lint, and typecheck will report "N/A — not configured."
 - **Guide variant selection is compile-time** — the plugin JS selects the correct `-github` or `-local` guide at registration time based on `project.platform` in `workflow.json`. Agents receive the full guide content in their prompt — they never need to resolve guide file paths at runtime. The `skills/orchestrate/SKILL.md` dispatcher is the only file that redirects at runtime (for the orchestrator, which has read access).
+- **Orchestrate requires `origin` remote** — both GitHub and local mode require a git remote named `origin`. Phase 1 of the orchestrate skill checks for this and aborts with a clear error if missing. Repos with no remote cannot use the orchestrate workflow.
 
 ## Testing
 
@@ -167,7 +168,7 @@ To bypass in an emergency: `git commit --no-verify` or set `HUSKY=0` in the envi
 
 ### Test file
 
-`tests/opencode-plugin-coding.test.js` — 61 tests across 9 suites covering all exported functions:
+`tests/opencode-plugin-coding.test.js` — 65 tests across 9 suites covering all exported functions:
 
 | Suite | What it covers |
 |-------|---------------|
@@ -176,7 +177,7 @@ To bypass in an emergency: `git commit --no-verify` or set `HUSKY=0` in the envi
 | `readWorkflowJson` | Missing file, invalid JSON, valid parse |
 | `readWorkflowLocalJson` | Same as above |
 | `readGuide` | Missing file, existing file (trimmed) |
-| `detectPlatform` | Explicit github/local, auto-detect from repo URL, bare slug, empty/absent repo, null workflow, explicit override |
+| `detectPlatform` | Explicit github/local, auto-detect from repo URL, bare slug, empty/absent repo, null workflow, explicit override, GHE custom-domain hosts (match, no-match, non-array, non-string entries) |
 | `loadCommands` | Key naming, required fields, optional agent/model fields, frontmatter parsing |
 | `registerAgents` | All code paths: object/array/string entries, GitHub account resolution, steps defaults, permissions for all 4 roles, user-override protection, platform-aware guide selection (github/local/auto-detect/override/fallback) |
 | `ZooplanktonCodingPlugin` | Skills path, commands, agents, idempotency, override protection |
