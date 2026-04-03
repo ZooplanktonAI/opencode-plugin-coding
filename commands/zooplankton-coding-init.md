@@ -19,6 +19,19 @@ PROJECT_NAME=$(basename "$(pwd)")
 DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "master")
 ```
 
+### Platform detection
+
+Determine whether this project should use `github` or `local` mode:
+
+1. **Check the git remote URL** (from `git remote get-url origin`):
+   - If the URL matches a GitHub pattern — SSH (`git@github.com:Org/repo.git`) or HTTPS (`https://github.com/Org/repo.git`) — set `platform` to `"github"`
+   - If the URL is a non-GitHub remote (e.g., GitLab, Bitbucket, self-hosted) — set `platform` to `"local"`
+   - If no remote exists (`git remote get-url origin` fails) — set `platform` to `"local"`
+   - **Note:** GitHub Enterprise instances with custom domains (not `github.com`) will auto-detect as `local`. Users should set `platform: "github"` manually in `workflow.json` if they want the full GitHub API workflow.
+   - **Note:** Local mode still requires a git remote named `origin` for the orchestrate workflow (`git fetch`, `git push`). If no remote exists, the user must add one before running orchestrate (e.g., `git remote add origin <url>`).
+   - **Note:** Local mode requires a git remote named `origin` for the orchestrate workflow (`git fetch`, `git push`). If no remote exists yet, the user must add one (`git remote add origin <url>`) before running the orchestrate skill, or orchestration commands that reference `origin` will fail.
+2. **Manual override:** The user can always change `project.platform` in `workflow.json` after init. Document this in the summary output.
+
 ### Stack detection
 
 1. Read `package.json` if it exists:
@@ -57,7 +70,8 @@ Create `.opencode/workflow.json` with the detected settings. The `agents` sectio
   "project": {
     "name": "<detected>",
     "repo": "<detected>",
-    "defaultBranch": "<detected>"
+    "defaultBranch": "<detected>",
+    "platform": "<detected — 'github' or 'local'>"
   },
   "stack": {
     "language": "<detected>",
@@ -164,6 +178,7 @@ After setup, print a summary:
 
 **Project:** <name>
 **Repo:** <repo>
+**Platform:** <platform> (auto-detected — override in workflow.json → project.platform if needed)
 **Stack:** <language> / <framework> / <packageManager>
 
 **Commands detected:**
@@ -185,6 +200,7 @@ After setup, print a summary:
 
 **Manual review checklist:**
 - [ ] Verify detected commands are correct in `.opencode/workflow.json`
+- [ ] Verify `project.platform` is correct (`github` or `local`). Override if auto-detection was wrong.
 - [ ] Review model assignments in `workflow.json` → `agents` section
 - [ ] Add or remove agents and adjust model IDs as needed
 - [ ] Add entries to `agents.securityReviewers` if security review is needed

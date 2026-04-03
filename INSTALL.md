@@ -7,7 +7,7 @@ How to install and use `opencode-plugin-coding` in your project.
 ## Prerequisites
 
 - [OpenCode](https://opencode.ai) installed and working
-- A GitHub repo with an `AGENTS.md` (recommended)
+- A git repo (GitHub or local)
 
 ---
 
@@ -206,7 +206,7 @@ The plugin uses OpenCode's `config` hook to register everything dynamically at s
 
 1. **Skills** — added to `config.skills.paths` for automatic discovery
 2. **Commands** — registered into `config.command` from `commands/*.md`
-3. **Agents** — registered into `config.agent` by reading `workflow.json` + `guides/*.md`
+3. **Agents** — registered into `config.agent` by reading `workflow.json` + platform-specific guide files (`guides/*-github.md` or `guides/*-local.md`)
 
 Agent prompts come from the guide files bundled in the plugin. Permissions are hardcoded per role:
 
@@ -214,10 +214,56 @@ Agent prompts come from the guide files bundled in the plugin. Permissions are h
 |------|------|------|------|----------|
 | core-coder | allow | all | allow | allow |
 | core-reviewer | deny | all | allow | deny |
-| normal reviewer | deny | `gh` only | allow | deny |
-| security reviewer | deny | `gh` only | allow | deny |
+| normal reviewer | deny | `gh`/`git` allowlist | allow | deny |
+| security reviewer | deny | `gh`/`git` allowlist | allow | deny |
 
-Normal/security reviewers can only run: `gh api *`, `gh pr diff *`, `gh pr view *`, `gh pr checks *`.
+Normal/security reviewers can run: `gh api *`, `gh pr diff *`, `gh pr view *`, `gh pr checks *`, `git diff *`, `git log *`, `git fetch *`.
+
+---
+
+## Local Mode (Non-GitHub Repos)
+
+The plugin supports a `local` platform mode for repos that don't use GitHub (or where you prefer git-only workflows without PRs).
+
+### How platform is determined
+
+1. The `/zooplankton-coding-init` command auto-detects: GitHub remote → `"github"`, otherwise → `"local"`
+2. You can override manually in `workflow.json` → `project.platform`
+
+### What's different in local mode
+
+| Feature | GitHub mode | Local mode |
+|---------|-------------|------------|
+| Code delivery | PR via `gh pr create` | Branch push via `git push` |
+| Review comments | Posted to PR via GitHub API | Returned as structured text in task results |
+| Merge | `gh pr merge --squash` | `git merge --no-ff` |
+| Security review | Posts verdict to PR | Returns verdict as text |
+| Pre-merge summary | Posted as PR comment | Printed to stdout |
+| `gh` CLI required | Yes | No |
+
+### Example local-mode `workflow.json`
+
+```json
+{
+  "project": {
+    "name": "my-local-project",
+    "repo": "",
+    "defaultBranch": "master",
+    "platform": "local"
+  },
+  "stack": { ... },
+  "commands": { ... },
+  "agents": { ... }
+}
+```
+
+### What works the same
+
+- All skills (brainstorm, plan, orchestrate, TDD, debugging)
+- Agent registration and permissions
+- Worktree management for core-coder and core-reviewers
+- Reviewer scoring and knowledge file
+- Plan/retrospective lifecycle
 
 ---
 

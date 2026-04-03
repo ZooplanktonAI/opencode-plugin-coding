@@ -3,7 +3,8 @@
   "project": {
     "name": "",
     "repo": "",
-    "defaultBranch": "master"
+    "defaultBranch": "master",
+    "platform": "github"
   },
   "stack": {
     "language": "",

@@ -1,4 +1,4 @@
-# Normal Reviewer Guide
+# Normal Reviewer Guide (GitHub Mode)
 
 Applies to all normal reviewer agents (e.g., `reviewer-glm`, `reviewer-minimax`, etc.).
 

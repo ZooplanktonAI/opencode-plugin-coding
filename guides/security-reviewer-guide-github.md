@@ -1,4 +1,4 @@
-# Security Reviewer Guide
+# Security Reviewer Guide (GitHub Mode)
 
 Applies to the dedicated security reviewer agent. In v1, this reviewer runs **pre-merge only** — after code-review rounds converge and immediately before the merge decision.
 

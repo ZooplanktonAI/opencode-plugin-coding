@@ -25,10 +25,14 @@ A shared [OpenCode](https://opencode.ai) plugin for multi-agent software develop
 
 Guide files define the prompt and behavior for each agent role. The plugin loads them automatically — they are not installed in consumer projects.
 
-- `guides/core-coder-guide.md` — Instructions for the core implementation agent
-- `guides/core-reviewer-guide.md` — Instructions for core reviewers (worktree + full verification)
-- `guides/reviewer-guide.md` — Instructions for normal reviewers (diff-based review)
-- `guides/security-reviewer-guide.md` — Instructions for the security reviewer (pre-merge)
+Each role has two platform variants (`-github.md` and `-local.md`). The plugin selects the correct variant at registration time based on `project.platform` in `workflow.json` and injects its content directly into the agent's prompt. No runtime file resolution is needed.
+
+| Guide | GitHub variant | Local variant |
+|-------|---------------|---------------|
+| Core coder | `core-coder-guide-github.md` | `core-coder-guide-local.md` |
+| Core reviewer | `core-reviewer-guide-github.md` | `core-reviewer-guide-local.md` |
+| Normal reviewer | `reviewer-guide-github.md` | `reviewer-guide-local.md` |
+| Security reviewer | `security-reviewer-guide-github.md` | `security-reviewer-guide-local.md` |
 
 ## Setup
 
@@ -96,7 +100,8 @@ After `/zooplankton-coding-init`, your project will have:
   "project": {
     "name": "my-project",
     "repo": "Org/my-project",
-    "defaultBranch": "master"
+    "defaultBranch": "master",
+    "platform": "github"
   },
   "stack": {
     "language": "typescript",

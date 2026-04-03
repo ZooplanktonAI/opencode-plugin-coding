@@ -1,6 +1,6 @@
-# Core Coder Guide
+# Core Coder Guide (Local Mode)
 
-Instructions for the core implementation agent (`core-coder`). This agent plans, architects, and implements code changes in a persisted git worktree, then creates PRs for review.
+Instructions for the core implementation agent (`core-coder`) in local mode. This agent plans, architects, and implements code changes in a persisted git worktree, then pushes the branch for review. No GitHub API (`gh`) is used.
 
 ---
 
@@ -33,7 +33,7 @@ git checkout -B <username>--<descriptive-branch-name> origin/<defaultBranch>
 
 All implementation work happens in this worktree directory. Use the `workdir` parameter when running bash commands.
 
-> **Note:** Read `<defaultBranch>` from `.opencode/workflow.json` → `project.defaultBranch`. The `<username>` is provided by the orchestrator (typically derived from the user's GitHub account or set explicitly in the task invocation).
+> **Note:** Read `<defaultBranch>` from `.opencode/workflow.json` → `project.defaultBranch`. The `<username>` is provided by the orchestrator (typically the prefix before `--` in the branch name convention, e.g. `panezhang` from `panezhang--feature-name`).
 
 ---
 
@@ -68,8 +68,8 @@ After plan approval:
 2. Implement the changes
 3. Run full verification (see below)
 4. Commit using [Conventional Commits](https://www.conventionalcommits.org/) format
-5. Push and create PR
-6. **Return to orchestrator:** PR number, PR URL, branch name
+5. Push the branch: `git push origin <branch-name>`
+6. **Return to orchestrator:** branch name
 
 ---
 
@@ -79,13 +79,13 @@ After plan approval:
 - Keep imports ordered and lint-clean
 - Follow existing project patterns unless the task explicitly includes modernization
 - Do not refactor unrelated code in the same patch
-- Prefer focused PRs with one major concern each
+- Prefer focused changes with one major concern each
 
 ---
 
 ## Full Verification
 
-Before creating or updating a PR, run every verification command from `workflow.json` → `commands`. All configured commands must pass.
+Before finalizing, run every verification command from `workflow.json` → `commands`. All configured commands must pass.
 
 Example (adapt to your project):
 
@@ -103,36 +103,25 @@ If any configured command fails, fix it before finalizing.
 
 ---
 
-## Creating a PR
+## Pushing the Branch
 
 After implementation and verification:
 
 ```bash
 git push origin <branch-name>
-
-gh pr create --title "<conventional-commit-style title>" --body "$(cat <<'EOF'
-## Summary
-<1-3 bullet points explaining why and what>
-
-## Verification
-<list each command and result>
-EOF
-)"
 ```
 
-**Return the PR number and URL to the orchestrator.**
+**Return the branch name to the orchestrator.**
 
 ---
 
 ## Handling Revision Requests
 
+The orchestrator passes all review feedback directly in the revision prompt. You do not need to read review comments from any external source.
+
 When the orchestrator sends reviewer feedback:
 
-1. Read all review comments on the PR:
-   ```bash
-   gh api repos/<REPO>/pulls/<PR>/reviews
-   gh api repos/<REPO>/pulls/<PR>/comments
-   ```
+1. Read the feedback provided in the prompt
 2. Fix all **blocking** issues
 3. For **advisory** issues, decide which to fix; justify each skip
 4. Commit with a descriptive conventional-commit message
@@ -163,7 +152,7 @@ This ensures valuable reviewer insights are never silently lost.
 
 ## General Rules
 
-- Prefer focused PRs with one major concern each
+- Prefer focused changes with one major concern each
 - Do not refactor unrelated code in the same patch
 - Preserve existing project patterns unless the task explicitly includes modernization
 - If you discover a new risk or non-trivial TODO, record it in `doc/TODO.md`
