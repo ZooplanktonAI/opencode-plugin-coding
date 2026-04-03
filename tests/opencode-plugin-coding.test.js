@@ -188,8 +188,8 @@ describe("loadCommands", () => {
     const commands = loadCommands();
     // Both command files in this repo have only `description` in frontmatter
     for (const [name, cmd] of Object.entries(commands)) {
-      assert.equal(cmd.agent, undefined, `${name} should not have agent`);
-      assert.equal(cmd.model, undefined, `${name} should not have model`);
+      assert.ok(!("agent" in cmd), `${name} should not have agent`);
+      assert.ok(!("model" in cmd), `${name} should not have model`);
     }
   });
 
@@ -255,7 +255,7 @@ describe("registerAgents", () => {
     const config = {};
     registerAgents(config, tmpDir);
     // config.agent should not be created
-    assert.equal(config.agent, undefined);
+    assert.ok(!("agent" in config));
   });
 
   it("registers coreCoder as a single agent (object form)", () => {
@@ -303,7 +303,7 @@ describe("registerAgents", () => {
     registerAgents(config, tmpDir);
     assert.equal(config.agent["my-coder"].description, "user-defined");
     // Should NOT have been replaced
-    assert.equal(config.agent["my-coder"].model, undefined);
+    assert.ok(!("model" in config.agent["my-coder"]));
   });
 
   it("includes GitHub account prompt via roleKey override", () => {
@@ -363,7 +363,7 @@ describe("registerAgents", () => {
     });
     const config = {};
     registerAgents(config, tmpDir);
-    assert.equal(config.agent["coder-no-steps"].steps, undefined);
+    assert.ok(!("steps" in config.agent["coder-no-steps"]));
   });
 
   it("does not set steps for coreReviewer when not specified", () => {
@@ -372,7 +372,7 @@ describe("registerAgents", () => {
     });
     const config = {};
     registerAgents(config, tmpDir);
-    assert.equal(config.agent["core-rev-no-steps"].steps, undefined);
+    assert.ok(!("steps" in config.agent["core-rev-no-steps"]));
   });
 
   it("only sets model when truthy", () => {

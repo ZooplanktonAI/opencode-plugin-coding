@@ -32,7 +32,7 @@ The Playwright MCP server must be configured in your OpenCode setup. Add to your
   "mcp": {
     "playwright": {
       "command": "npx",
-      "args": ["@anthropic/mcp-playwright"]
+      "args": ["@playwright/mcp"]
     }
   }
 }
@@ -55,7 +55,7 @@ Or use the Docker variant:
 
 If the Playwright MCP server is not configured:
 
-1. Report to the user: "Playwright MCP server is not available. Install it with: `npm install -g @anthropic/mcp-playwright`"
+1. Report to the user: "Playwright MCP server is not available. Install it with: `npm install -g @playwright/mcp`"
 2. Suggest alternatives:
    - Write Playwright test scripts that the user can run manually
    - Use `curl` for API-level testing

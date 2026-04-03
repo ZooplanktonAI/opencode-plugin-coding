@@ -50,7 +50,7 @@ OpenCode will auto-install the plugin from npm via Bun at startup. The plugin re
 ### Pin a specific version (optional)
 
 ```json
-"plugin": ["opencode-plugin-coding@0.1.0"]
+"plugin": ["opencode-plugin-coding@0.1.5"]
 ```
 
 ### Global installation (optional)
@@ -117,7 +117,7 @@ After `/zooplankton-coding-init`, your project will have:
     ],
     "reviewers": [
       { "name": "reviewer-glm", "model": "alibaba-coding-plan-cn/glm-5" },
-      { "name": "reviewer-minimax", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" }
+      { "name": "reviewer-minimax", "model": "minimax-cn-coding-plan/MiniMax-M2.7" }
     ],
     "securityReviewers": []
   },

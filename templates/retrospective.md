@@ -15,7 +15,6 @@ rounds:   # integer: total review rounds completed
 
 | Reviewer | Model | Focus Areas | Score | Notes |
 |----------|-------|-------------|-------|-------|
-| | | | | |
 
 ## Key Findings
 

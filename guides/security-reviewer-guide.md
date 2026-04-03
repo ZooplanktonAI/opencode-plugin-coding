@@ -15,7 +15,7 @@ The security reviewer provides a focused security analysis of the PR diff. It ca
 - **Repository:** Use the repo name from `.opencode/workflow.json` → `project.repo`
 - **Substitute all placeholders:** `PR_NUMBER`, `BRANCH`, `ROUND`, `MODEL_ID`, `SHA`
 - **Timing:** Pre-merge only (runs after code-review rounds converge, immediately before merge decision)
-- **Allowed bash commands:** `gh api *`, `gh pr view *`, `gh pr diff *`
+- **Allowed bash commands:** `gh api *`, `gh pr view *`, `gh pr diff *`, `gh pr checks *`
 
 ---
 

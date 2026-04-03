@@ -2,6 +2,7 @@ node_modules/
 .DS_Store
 
 # opencode-plugin-coding ephemeral files
+.opencode/workflow-local.json
 .opencode/reviewer-knowledge.json
 .opencode/plans/
 .opencode/retrospectives/
