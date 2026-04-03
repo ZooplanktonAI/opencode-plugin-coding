@@ -2,7 +2,8 @@
   "project": {
     "name": "opencode-plugin-coding",
     "repo": "ZooplanktonAI/opencode-plugin-coding",
-    "defaultBranch": "master"
+    "defaultBranch": "master",
+    "githubEnterpriseHosts": []
   },
   "stack": {
     "language": "markdown",

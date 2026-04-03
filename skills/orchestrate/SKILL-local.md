@@ -36,7 +36,26 @@ Read `.opencode/workflow.json` at the start of every orchestration. Key fields:
 - `docsToRead` — files all agents must read before working
 - `reviewFocus` — array of short emphasis labels (e.g., `"type safety"`, `"module boundaries"`); reviewers look up detailed rules in `docsToRead` files
 
-**Note:** Local mode requires a git remote named `origin` (for `git fetch`, `git push`, etc.) but does not use the GitHub API or `gh` CLI. If `origin` is unreachable, `git push` and `git fetch` commands will fail — ensure the remote is configured and accessible. GitHub Enterprise instances with custom domains should set `platform: "github"` explicitly if they want the full GitHub API workflow.
+**Note:** Local mode requires a git remote named `origin` (for `git fetch`, `git push`, etc.) but does not use the GitHub API or `gh` CLI. If `origin` is unreachable, `git push` and `git fetch` commands will fail — ensure the remote is configured and accessible. GitHub Enterprise instances with custom domains should set `platform: "github"` explicitly if they want the full GitHub API workflow, or add the hostname to `project.githubEnterpriseHosts` for auto-detection.
+
+---
+
+## TDD Integration
+
+If `workflow.json` → `testDrivenDevelopment.enabled` is `true`, modify the invocation templates as follows during Phase 1 (Setup):
+
+**Core-coder: Implementation template** — append this block at the end:
+
+> You must follow the RED-GREEN-REFACTOR cycle for every task:
+> 1. **RED** — write a failing test first (commit with `test:` prefix)
+> 2. **GREEN** — write the minimum code to make it pass (commit with `feat:` prefix)
+> 3. **REFACTOR** — clean up without breaking tests (commit with `refactor:` prefix)
+>
+> Load and follow the `test-driven-development` skill for detailed guidance.
+
+**Core reviewer and normal reviewer templates** — append this note:
+
+> TDD is enabled for this project. Verify that tests were written before implementation by checking the commit order (`test:` commits must precede implementation commits like `feat:` or `feat(<scope>):` for each feature).
 
 ---
 
@@ -81,7 +100,14 @@ If the change is < 20 lines, straightforward, and low-risk, skip Phases 1–2:
 2. Run cleanup policy (see Cleanup Policy section below)
 3. Check for stale plans and report alerts
 4. Verify worktrees exist (create if missing)
-5. If a plan file exists at `.opencode/plans/<branch>.md`, read it. Otherwise, invoke `@<coreCoder>` to produce a plan first (see Phase 2 planning step).
+5. Verify a git remote named `origin` exists:
+   ```bash
+   git remote get-url origin
+   ```
+   If the command exits non-zero, **abort orchestration** with a clear error:
+   > ❌ No git remote named `origin` found. Local mode requires `origin` for `git fetch` and `git push` operations. Run `git remote add origin <url>` first, or configure a bare local remote if working fully offline.
+6. If `testDrivenDevelopment.enabled` is `true` in `workflow.json`, apply the TDD modifications from the TDD Integration section to the invocation templates used in subsequent phases.
+7. If a plan file exists at `.opencode/plans/<branch>.md`, read it. Otherwise, invoke `@<coreCoder>` to produce a plan first (see Phase 2 planning step).
 
 ---
 

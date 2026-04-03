@@ -10,11 +10,12 @@ description: Full multi-agent software development workflow — implement, revie
 Before proceeding, determine which platform variant to use:
 
 1. Read `.opencode/workflow.json` → `project.platform`
-2. **Auto-detection** (if `platform` is absent or empty):
+2. **Explicit override:** if `platform` is set to `"github"` or `"local"`, use that value directly
+3. **Auto-detection** (if `platform` is absent or empty):
    - If `project.repo` is non-empty and contains `github.com` → use `github`
+   - If `project.repo` matches any hostname in `project.githubEnterpriseHosts` → use `github`
    - Otherwise → use `local`
-   - **Note:** A bare `Org/repo` slug alone is not sufficient to auto-detect GitHub — GitLab and Bitbucket also use this pattern. GitHub Enterprise instances with custom domains should set `platform: "github"` explicitly.
-3. **Explicit override:** if `platform` is set to `"github"` or `"local"`, use that value directly
+   - **Note:** A bare `Org/repo` slug alone is not sufficient to auto-detect GitHub — GitLab and Bitbucket also use this pattern.
 
 ## Load the Correct Variant
 

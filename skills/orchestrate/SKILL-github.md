@@ -38,6 +38,25 @@ Read `.opencode/workflow.json` at the start of every orchestration. Key fields:
 
 ---
 
+## TDD Integration
+
+If `workflow.json` → `testDrivenDevelopment.enabled` is `true`, modify the invocation templates as follows during Phase 1 (Setup):
+
+**Core-coder: Implementation template** — append this block at the end:
+
+> You must follow the RED-GREEN-REFACTOR cycle for every task:
+> 1. **RED** — write a failing test first (commit with `test:` prefix)
+> 2. **GREEN** — write the minimum code to make it pass (commit with `feat:` prefix)
+> 3. **REFACTOR** — clean up without breaking tests (commit with `refactor:` prefix)
+>
+> Load and follow the `test-driven-development` skill for detailed guidance.
+
+**Core reviewer and normal reviewer templates** — append this note:
+
+> TDD is enabled for this project. Verify that tests were written before implementation by checking the commit order (`test:` commits must precede implementation commits like `feat:` or `feat(<scope>):` for each feature).
+
+---
+
 ## Worktree Setup (One-Time)
 
 Before the first task, ensure persisted worktrees exist for the core-coder and all core reviewers:
@@ -80,7 +99,14 @@ If the change is < 20 lines, straightforward, and low-risk, skip Phases 1–2:
 2. Run cleanup policy (see Cleanup Policy section below)
 3. Check for stale plans and report alerts
 4. Verify worktrees exist (create if missing)
-5. If a plan file exists at `.opencode/plans/<branch>.md`, read it. Otherwise, invoke `@<coreCoder>` to produce a plan first (see Phase 2 planning step).
+5. Verify a git remote named `origin` exists:
+   ```bash
+   git remote get-url origin
+   ```
+   If the command exits non-zero, **abort orchestration** with a clear error:
+   > ❌ No git remote named `origin` found. The orchestrate workflow requires a GitHub repo with `origin` configured for `git fetch`, `git push`, and `gh` API operations. Run `git remote add origin <url>` first.
+6. If `testDrivenDevelopment.enabled` is `true` in `workflow.json`, apply the TDD modifications from the TDD Integration section to the invocation templates used in subsequent phases.
+7. If a plan file exists at `.opencode/plans/<branch>.md`, read it. Otherwise, invoke `@<coreCoder>` to produce a plan first (see Phase 2 planning step).
 
 ---
 
