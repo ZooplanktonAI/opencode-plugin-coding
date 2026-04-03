@@ -27,7 +27,7 @@ Determine whether this project should use `github` or `local` mode:
    - If the URL matches a GitHub pattern — SSH (`git@github.com:Org/repo.git`) or HTTPS (`https://github.com/Org/repo.git`) — set `platform` to `"github"`
    - If the URL is a non-GitHub remote (e.g., GitLab, Bitbucket, self-hosted) — set `platform` to `"local"`
    - If no remote exists (`git remote get-url origin` fails) — set `platform` to `"local"`
-   - **GitHub Enterprise:** If the remote URL contains a custom domain (not `github.com`), ask the user: *"Is this a GitHub Enterprise instance? (y/n)"*. If yes, set `platform` to `"github"` and add the hostname to `project.githubEnterpriseHosts` so future auto-detection works without the prompt.
+   - **GitHub Enterprise:** If the remote URL contains a custom domain (not `github.com`), ask the user: *"Is this a GitHub Enterprise instance? (y/n)"*. If yes, extract just the hostname from the remote URL (e.g., from `https://github.mycompany.com/Org/repo.git` the hostname is `github.mycompany.com`), set `platform` to `"github"`, and add the hostname to `project.githubEnterpriseHosts` so future auto-detection works without the prompt.
    - **Note:** Local mode still requires a git remote named `origin` for the orchestrate workflow (`git fetch`, `git push`). If no remote exists, the user must add one before running orchestrate (e.g., `git remote add origin <url>`).
 2. **Manual override:** The user can always change `project.platform` in `workflow.json` after init. Document this in the summary output.
 

@@ -250,7 +250,8 @@ The plugin supports a `local` platform mode for repos that don't use GitHub (or 
     "name": "my-local-project",
     "repo": "",
     "defaultBranch": "master",
-    "platform": "local"
+    "platform": "local",
+    "githubEnterpriseHosts": []
   },
   "stack": { ... },
   "commands": { ... },

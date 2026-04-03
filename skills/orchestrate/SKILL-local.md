@@ -55,7 +55,7 @@ If `workflow.json` → `testDrivenDevelopment.enabled` is `true`, modify the inv
 
 **Core reviewer and normal reviewer templates** — append this note:
 
-> TDD is enabled for this project. Verify that tests were written before implementation by checking the commit order (`test:` commits must precede `feat:` commits for each feature).
+> TDD is enabled for this project. Verify that tests were written before implementation by checking the commit order (`test:` commits must precede implementation commits like `feat:` or `feat(<scope>):` for each feature).
 
 ---
 
@@ -102,11 +102,12 @@ If the change is < 20 lines, straightforward, and low-risk, skip Phases 1–2:
 4. Verify worktrees exist (create if missing)
 5. Verify a git remote named `origin` exists:
    ```bash
-   git remote | grep -q origin
+   git remote get-url origin
    ```
-   If missing, **abort orchestration** with a clear error:
+   If the command exits non-zero, **abort orchestration** with a clear error:
    > ❌ No git remote named `origin` found. Local mode requires `origin` for `git fetch` and `git push` operations. Run `git remote add origin <url>` first, or configure a bare local remote if working fully offline.
-6. If a plan file exists at `.opencode/plans/<branch>.md`, read it. Otherwise, invoke `@<coreCoder>` to produce a plan first (see Phase 2 planning step).
+6. If `testDrivenDevelopment.enabled` is `true` in `workflow.json`, apply the TDD modifications from the TDD Integration section to the invocation templates used in subsequent phases.
+7. If a plan file exists at `.opencode/plans/<branch>.md`, read it. Otherwise, invoke `@<coreCoder>` to produce a plan first (see Phase 2 planning step).
 
 ---
 
