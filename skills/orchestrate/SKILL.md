@@ -43,7 +43,7 @@ Read `.opencode/workflow.json` at the start of every orchestration. Key fields:
 Before the first task, ensure persisted worktrees exist for the core-coder and all core reviewers:
 
 ```bash
-# Core coder worktree
+# Core coder worktree (name from agents.coreCoder.name in workflow.json)
 ls .worktrees/core-coder 2>/dev/null || git worktree add --detach .worktrees/core-coder
 
 # Core reviewer worktrees — create one per entry in agents.coreReviewers
