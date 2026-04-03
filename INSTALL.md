@@ -206,7 +206,7 @@ The plugin uses OpenCode's `config` hook to register everything dynamically at s
 
 1. **Skills** — added to `config.skills.paths` for automatic discovery
 2. **Commands** — registered into `config.command` from `commands/*.md`
-3. **Agents** — registered into `config.agent` by reading `workflow.json` + `guides/*.md`
+3. **Agents** — registered into `config.agent` by reading `workflow.json` + platform-specific guide files (`guides/*-github.md` or `guides/*-local.md`)
 
 Agent prompts come from the guide files bundled in the plugin. Permissions are hardcoded per role:
 
@@ -217,7 +217,7 @@ Agent prompts come from the guide files bundled in the plugin. Permissions are h
 | normal reviewer | deny | `gh`/`git` allowlist | allow | deny |
 | security reviewer | deny | `gh`/`git` allowlist | allow | deny |
 
-Normal/security reviewers can run: `gh api *`, `gh pr diff *`, `gh pr view *`, `gh pr checks *`, `git diff *`, `git log *`.
+Normal/security reviewers can run: `gh api *`, `gh pr diff *`, `gh pr view *`, `gh pr checks *`, `git diff *`, `git log *`, `git fetch *`.
 
 ---
 

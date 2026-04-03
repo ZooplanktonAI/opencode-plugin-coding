@@ -301,8 +301,7 @@ Steps:
 3. git checkout -B <username>--<branch-name> origin/<defaultBranch>
 4. Implement
 5. Run full verification: <commands from workflow.json>
-6. Commit (Conventional Commits) and push
-7. Push branch: git push origin <branch-name>
+6. Commit (Conventional Commits) and push: git push origin <branch-name>
 
 Return: branch name.
 ```

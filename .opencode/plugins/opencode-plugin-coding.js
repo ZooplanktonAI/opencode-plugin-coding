@@ -84,10 +84,11 @@ export const readWorkflowLocalJson = (directory) => {
   }
 };
 
-// Agent role definitions: guide file, description, and permissions
+// Agent role definitions: guide file (default = -github variant), description, and permissions.
+// The registerAgents function selects the correct platform variant at registration time.
 const AGENT_ROLES = {
   coreCoder: {
-    guide: "core-coder-guide.md",
+    guide: "core-coder-guide-github.md",
     description:
       "Core implementation agent — executes plans, writes code, runs verification, creates PRs.",
     permission: {
@@ -98,7 +99,7 @@ const AGENT_ROLES = {
     },
   },
   coreReviewer: {
-    guide: "core-reviewer-guide.md",
+    guide: "core-reviewer-guide-github.md",
     description:
       "Core code reviewer (blocking) — full verification in worktree, reviews all areas.",
     permission: {
@@ -109,7 +110,7 @@ const AGENT_ROLES = {
     },
   },
   reviewer: {
-    guide: "reviewer-guide.md",
+    guide: "reviewer-guide-github.md",
     description:
       "Code reviewer (non-blocking) — diff-based review on assigned areas.",
     permission: {
@@ -129,7 +130,7 @@ const AGENT_ROLES = {
     },
   },
   securityReviewer: {
-    guide: "security-reviewer-guide.md",
+    guide: "security-reviewer-guide-github.md",
     description: "Security reviewer — pre-merge security analysis.",
     permission: {
       edit: "deny",
@@ -168,6 +169,14 @@ const ROLE_STEP_DEFAULTS = {
 export const buildGithubAccountPrompt = (account) =>
   `\n\n## GitHub Account\n\nYou are operating as GitHub user \`${account}\`. **Every** \`gh\` command you run must be prefixed with an inline token to avoid conflicts with other concurrent agents:\n\`\`\`sh\nGH_TOKEN=$(gh auth token --user ${account}) gh <subcommand> ...\n\`\`\`\nNever use \`gh auth switch\`. Always use the inline \`GH_TOKEN=...\` prefix pattern shown above.`;
 
+// Detect the platform from workflow.json: explicit > auto-detect from project.repo > default "github"
+export const detectPlatform = (workflow) => {
+  const explicit = workflow?.project?.platform;
+  if (explicit === "github" || explicit === "local") return explicit;
+  const repo = workflow?.project?.repo || "";
+  return repo.includes("github.com") ? "github" : "local";
+};
+
 // Register agents from workflow.json into cfg.agent
 export const registerAgents = (config, directory) => {
   const workflow = readWorkflowJson(directory);
@@ -176,11 +185,20 @@ export const registerAgents = (config, directory) => {
   const local = readWorkflowLocalJson(directory);
   const githubAccountConfig = local?.github?.account || {};
 
+  // Select platform-specific guide variant
+  const platform = detectPlatform(workflow);
+  const guideSuffix = platform === "local" ? "-local" : "-github";
+
   config.agent = config.agent || {};
 
   for (const [field, roleKey] of Object.entries(FIELD_TO_ROLE)) {
     const role = AGENT_ROLES[roleKey];
-    const basePrompt = readGuide(role.guide);
+
+    // Try platform-specific guide variant first, fall back to role default (github)
+    const guideBase = role.guide.replace(/-github\.md$/, "");
+    const variantGuide = `${guideBase}${guideSuffix}.md`;
+    const basePrompt = readGuide(variantGuide) || readGuide(role.guide);
+
     const entries = workflow.agents[field];
     if (!entries) continue;
 

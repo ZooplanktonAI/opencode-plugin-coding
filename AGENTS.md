@@ -17,16 +17,12 @@ opencode-plugin-coding/
 │   ├── zooplankton-coding-init.md          # /zooplankton-coding-init command
 │   └── zooplankton-coding-update.md        # /zooplankton-coding-update command
 ├── guides/
-│   ├── core-coder-guide.md                 # Dispatcher → loads -github or -local variant
 │   ├── core-coder-guide-github.md          # GitHub-mode core coder instructions
 │   ├── core-coder-guide-local.md           # Local-mode core coder instructions
-│   ├── core-reviewer-guide.md              # Dispatcher → loads -github or -local variant
 │   ├── core-reviewer-guide-github.md       # GitHub-mode core reviewer instructions
 │   ├── core-reviewer-guide-local.md        # Local-mode core reviewer instructions
-│   ├── reviewer-guide.md                   # Dispatcher → loads -github or -local variant
 │   ├── reviewer-guide-github.md            # GitHub-mode normal reviewer instructions
 │   ├── reviewer-guide-local.md             # Local-mode normal reviewer instructions
-│   ├── security-reviewer-guide.md          # Dispatcher → loads -github or -local variant
 │   ├── security-reviewer-guide-github.md   # GitHub-mode security reviewer instructions
 │   └── security-reviewer-guide-local.md    # Local-mode security reviewer instructions
 ├── skills/
@@ -78,8 +74,9 @@ All content files are markdown (`.md`). The only JS file is the plugin entry poi
 Agents are **dynamically registered** by the plugin JS via OpenCode's `config.agent` API. There are no `.opencode/agents/*.md` files in consumer projects. The plugin reads:
 
 1. **workflow.json** → `agents` section for `{ name, model }` definitions
-2. **guides/*.md** for prompt content (used as the agent's `prompt` field)
-3. **Hardcoded permission maps** in the plugin JS (matching the source of truth table below)
+2. **workflow.json** → `project.platform` for platform detection (selects `-github` or `-local` guide variant)
+3. **guides/*-github.md / *-local.md** for prompt content (used as the agent's `prompt` field)
+4. **Hardcoded permission maps** in the plugin JS (matching the source of truth table below)
 
 This means:
 - To add/remove agents or change models, edit `workflow.json` and restart OpenCode
@@ -102,7 +99,7 @@ Normal/security reviewer bash allowlist: `gh api *`, `gh pr diff *`, `gh pr view
 The plugin uses OpenCode's `config` hook (undocumented but confirmed in OpenCode source) to:
 1. Add `skills/` to `config.skills.paths` for skill discovery
 2. Register commands from `commands/*.md` into `config.command`
-3. Register agents from `workflow.json` + `guides/*.md` into `config.agent`
+3. Detect platform from `workflow.json` → `project.platform` and register agents with the correct guide variant (`-github` or `-local`)
 
 No symlinks are used. Consumer projects install via `"plugin"` array in `opencode.json`.
 
@@ -135,11 +132,13 @@ The plugin supports two platform modes: `github` and `local`. The platform is se
 
 **Auto-detection** (if `platform` is absent or empty): if `project.repo` is non-empty and contains `github.com`, use `github`; otherwise use `local`. A bare `Org/repo` slug alone is not sufficient — GitLab and Bitbucket also use this pattern. GitHub Enterprise instances with custom domains should set `platform: "github"` explicitly.
 
-**How it works:** Each guide file and the orchestrate skill are **dispatcher files** at their original paths (e.g., `guides/core-coder-guide.md`, `skills/orchestrate/SKILL.md`). The dispatcher reads `project.platform`, applies auto-detection if needed, and loads the correct variant:
+**How it works:** The plugin JS reads `project.platform` from `workflow.json` at registration time and selects the correct `-github` or `-local` guide variant as the agent's prompt. No runtime file resolution is needed — the platform-specific guide content is injected directly into the agent config at startup. For the orchestrate skill, a thin dispatcher file at `skills/orchestrate/SKILL.md` reads `project.platform` and redirects the orchestrator to the correct variant (`SKILL-github.md` or `SKILL-local.md`). The orchestrator has read access to both files.
+
+Variants:
 - `-github.md` — full GitHub API integration (PRs, review comments via `gh api`, squash merge)
 - `-local.md` — git-only workflow (branch push, `git merge --no-ff`, review findings via task return values)
 
-The plugin JS always loads the dispatcher files at the original paths. No plugin changes are needed per platform — the dispatchers handle routing.
+The plugin JS always loads the platform-specific guide variant at registration time. No guide dispatcher files are needed — the `AGENT_ROLES` default to `-github` guides, and the platform selection logic overrides with `-local` when appropriate.
 
 ## Gotchas
 
@@ -151,7 +150,7 @@ The plugin JS always loads the dispatcher files at the original paths. No plugin
 - **No agent `.md` files in consumer projects** — agents are registered dynamically. If you see references to `.opencode/agents/*.md` in consumer projects, those are stale artifacts from before the architecture change.
 - **Session reuse across review rounds** — the orchestrate skill recommends passing `task_id` to resume reviewer sessions across rounds, so reviewers retain context. If a resumed session fails, fall back to a fresh session.
 - **Orchestrate smoke test** — to validate the full orchestrate flow in this repo, see `doc/SMOKE_TEST.md`. Use a trivial change (e.g., docs tweak) and run all 5 phases. Note that only `test` (`npm test`) is configured in `.opencode/workflow.json`; build, lint, and typecheck will report "N/A — not configured."
-- **Guide files are dispatchers** — the files at `guides/core-coder-guide.md` etc. are thin dispatchers that load `-github.md` or `-local.md` variants based on `project.platform`. The plugin loads guides at these original paths — do not rename or remove the dispatcher files.
+- **Guide variant selection is compile-time** — the plugin JS selects the correct `-github` or `-local` guide at registration time based on `project.platform` in `workflow.json`. Agents receive the full guide content in their prompt — they never need to resolve guide file paths at runtime. The `skills/orchestrate/SKILL.md` dispatcher is the only file that redirects at runtime (for the orchestrator, which has read access).
 
 ## Testing
 
@@ -168,7 +167,7 @@ To bypass in an emergency: `git commit --no-verify` or set `HUSKY=0` in the envi
 
 ### Test file
 
-`tests/opencode-plugin-coding.test.js` — 46 tests across 8 suites covering all exported functions:
+`tests/opencode-plugin-coding.test.js` — 61 tests across 9 suites covering all exported functions:
 
 | Suite | What it covers |
 |-------|---------------|
@@ -177,8 +176,9 @@ To bypass in an emergency: `git commit --no-verify` or set `HUSKY=0` in the envi
 | `readWorkflowJson` | Missing file, invalid JSON, valid parse |
 | `readWorkflowLocalJson` | Same as above |
 | `readGuide` | Missing file, existing file (trimmed) |
+| `detectPlatform` | Explicit github/local, auto-detect from repo URL, bare slug, empty/absent repo, null workflow, explicit override |
 | `loadCommands` | Key naming, required fields, optional agent/model fields, frontmatter parsing |
-| `registerAgents` | All code paths: object/array/string entries, GitHub account resolution, steps defaults, permissions for all 4 roles, user-override protection |
+| `registerAgents` | All code paths: object/array/string entries, GitHub account resolution, steps defaults, permissions for all 4 roles, user-override protection, platform-aware guide selection (github/local/auto-detect/override/fallback) |
 | `ZooplanktonCodingPlugin` | Skills path, commands, agents, idempotency, override protection |
 
 ### Test gotchas
