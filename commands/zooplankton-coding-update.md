@@ -50,16 +50,13 @@ Offer to migrate to the new `{ name, model }` format:
 
 Show the proposed migration and ask for confirmation before writing.
 
-## Step 3: Guide Changes Summary
+## Step 3: Guide Changes Note
 
-Read the plugin's guide files (`guides/*.md`) and show a brief changelog if significant changes were made since the last update. This is informational only — guides are loaded dynamically by the plugin, so no action is needed from the user.
+Note that guide files (`guides/*.md`) are loaded dynamically by the plugin at runtime. No user action is needed — any changes to guides take effect on the next OpenCode restart. Inform the user:
 
 ```
-Plugin guide updates (applied automatically):
-- core-coder-guide.md: <summary of changes, or "no changes">
-- core-reviewer-guide.md: <summary>
-- reviewer-guide.md: <summary>
-- security-reviewer-guide.md: <summary>
+Plugin guides are loaded dynamically — no action needed.
+Guide files: core-coder-guide.md, core-reviewer-guide.md, reviewer-guide.md, security-reviewer-guide.md
 ```
 
 ## Step 4: Apply Accepted Changes
@@ -89,5 +86,4 @@ To change models or add/remove agents, edit `.opencode/workflow.json` and restar
 ## Rules
 
 - **Never overwrite user values** without confirmation — model assignments, agent names, project settings are user customizations
-- **Preserve comments** if the file has any (though JSON doesn't support comments, some users use JSONC)
 - If no updates are needed, say so clearly and exit

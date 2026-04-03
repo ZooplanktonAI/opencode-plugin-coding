@@ -38,7 +38,7 @@ Checklist for validating the orchestrate workflow end-to-end within this reposit
 
 ## Notes
 
-- This repo has no build/lint/test/typecheck commands configured in `.opencode/workflow.json`. Verification steps will report one of: **PASS**, **FAIL**, or **N/A — not configured**. All three are valid outcomes depending on project setup.
+- This repo has only `test` (`npm test`) configured in `.opencode/workflow.json` → `commands`. Build, lint, and typecheck are empty strings. Verification steps will report **PASS** or **FAIL** for `test`, and **N/A — not configured** for the others.
 - Security reviewers are configured in this repo (`agents.securityReviewers` in `.opencode/workflow.json`) and only run pre-merge. Checkpoint 13 validates this gate.
 - The smoke test is intentionally run on a trivial change to minimize risk.
 - The default branch is read from `.opencode/workflow.json` → `project.defaultBranch`. It is `master` for this repo but may differ in other projects.

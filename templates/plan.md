@@ -2,6 +2,7 @@
 status: not_started
 branch: 
 created: 
+design: 
 ---
 
 # Plan: [Title]
@@ -15,12 +16,20 @@ created:
 - [ ] Task 1: [Description]
   - Files: [exact file paths]
   - Acceptance: [criteria]
+  - Dependencies: [none, or prior task numbers]
 
 ## Verification
 
-- Build: `[command]`
-- Tests: `[command]`
-- Lint: `[command]`
+| Command | Expected |
+|---------|----------|
+| `<typecheck>` | 0 errors |
+| `<lint>` | clean |
+| `<test>` | all pass |
+| `<build>` | success |
+
+## Risks
+
+- [risk 1]
 
 ## Learnings (updated during execution)
 

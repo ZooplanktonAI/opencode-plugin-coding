@@ -26,7 +26,7 @@ Create or edit `opencode.json` in your project root:
 
 OpenCode installs the plugin automatically from npm via Bun on startup. No symlinks, no manual copies.
 
-To pin a specific version: `"opencode-plugin-coding@0.1.0"`.
+To pin a specific version: `"opencode-plugin-coding@0.1.5"`.
 
 ### Global installation (optional)
 
@@ -84,7 +84,7 @@ Each agent is a `{ name, model }` object. The plugin dynamically registers agent
   ],
   "reviewers": [
     { "name": "reviewer-glm", "model": "alibaba-coding-plan-cn/glm-5" },
-    { "name": "reviewer-minimax", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" },
+    { "name": "reviewer-minimax", "model": "minimax-cn-coding-plan/MiniMax-M2.7" },
     { "name": "reviewer-qwen", "model": "alibaba-coding-plan-cn/qwen3.5-plus" },
     { "name": "reviewer-kimi", "model": "alibaba-coding-plan-cn/kimi-k2.5" },
     { "name": "reviewer-ark", "model": "volcengine-plan/ark-code-latest" },
@@ -238,7 +238,7 @@ Guide file changes take effect immediately — they're loaded from the plugin, n
 
 **Agents not appearing:**
 - Verify `.opencode/workflow.json` exists and has a valid `agents` section
-- Each agent needs both `name` and `model` fields
+- Each agent needs a `name` field; `model` is optional (if omitted, the agent inherits the default model)
 - Restart OpenCode after editing `workflow.json`
 
 **Worktree errors:**

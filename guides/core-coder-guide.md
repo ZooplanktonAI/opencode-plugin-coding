@@ -6,12 +6,12 @@ Instructions for the core implementation agent (`core-coder`). This agent plans,
 
 ## Worktree Setup
 
-You work in a persisted git worktree at `.worktrees/core-coder` (relative to the main repo root).
+You work in a persisted git worktree at `.worktrees/<coreCoder.name>` (relative to the main repo root), where `<coreCoder.name>` comes from `.opencode/workflow.json` → `agents.coreCoder.name` (typically `core-coder`).
 
 **First-time setup** (if the worktree does not exist):
 
 ```bash
-git worktree add --detach .worktrees/core-coder
+git worktree add --detach .worktrees/<coreCoder.name>
 ```
 
 **Before each task**, ensure the worktree is clean and on a fresh branch:
@@ -33,7 +33,7 @@ git checkout -B <username>--<descriptive-branch-name> origin/<defaultBranch>
 
 All implementation work happens in this worktree directory. Use the `workdir` parameter when running bash commands.
 
-> **Note:** Read `<defaultBranch>` and `<username>` from `.opencode/workflow.json` project settings. The repo name is also in `workflow.json`.
+> **Note:** Read `<defaultBranch>` from `.opencode/workflow.json` → `project.defaultBranch`. The `<username>` is provided by the orchestrator (typically derived from the user's GitHub account or set explicitly in the task invocation).
 
 ---
 

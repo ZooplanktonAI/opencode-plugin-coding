@@ -46,8 +46,8 @@ Before the first task, ensure persisted worktrees exist for the core-coder and a
 # Core coder worktree
 ls .worktrees/core-coder 2>/dev/null || git worktree add --detach .worktrees/core-coder
 
-# Core reviewer worktrees — create one per name in agents.coreReviewers
-# Example for the default 2-reviewer config:
+# Core reviewer worktrees — create one per entry in agents.coreReviewers
+# Example for a 2-reviewer config (names from agents.coreReviewers[i].name):
 ls .worktrees/core-reviewer-primary 2>/dev/null || git worktree add --detach .worktrees/core-reviewer-primary
 ls .worktrees/core-reviewer-secondary 2>/dev/null || git worktree add --detach .worktrees/core-reviewer-secondary
 ```
@@ -63,7 +63,7 @@ Read `agents.coreCoder.name` and each `agents.coreReviewers[i].name` from `workf
 If the change is < 20 lines, straightforward, and low-risk, skip Phases 1–2:
 
 1. Edit files directly
-2. Create branch: `git checkout -b <username>--<name>`
+2. Create branch: `git checkout -B <username>--<name>`
 3. Commit (Conventional Commits) and push
 4. `gh pr create`
 5. Run Phase 3 (all reviewers in parallel)
@@ -126,7 +126,7 @@ Each reviewer follows their respective guide (`guides/core-reviewer-guide.md` or
 
 ### 3b. Collect Results (Non-Blocking Wait)
 
-**Proceed to Phase 4 as soon as both core reviewers have returned results.** Include results from any normal reviewers that have already completed; treat non-returned normal reviewers as having raised no issues for that round.
+**Proceed to Phase 4 as soon as all core reviewers have returned results.** Include results from any normal reviewers that have already completed; treat non-returned normal reviewers as having raised no issues for that round.
 
 This is the "admin-style" non-blocking wait — core reviewers form the quorum, normal reviewers contribute opportunistically.
 
@@ -156,7 +156,7 @@ Count unique blocking and advisory issues across all reviewers.
 | No issues at all | Proceed to **Phase 4a (Security Gate)** |
 | Blocking issues exist, round < 3 | Increment round; send all feedback to `@<coreCoder>`; if new round = 3 add final-round signal; go to Phase 3 |
 | Advisory-only (no blocking), round < 3 | **Always final round.** Increment round; send advisories to `@<coreCoder>` with final-round signal; go to Phase 3 |
-| Round >= 3 | Stop. If previous round was blocking (not advisory-only), send final-round signal to `@<coreCoder>` for TODO.md. Proceed to **Phase 4a (Security Gate)** |
+| Round >= 3 | Stop. Send final-round signal to `@<coreCoder>` for TODO.md (if not already sent in an advisory-only round). Proceed to **Phase 4a (Security Gate)** |
 
 **Critical rules:**
 - **Never merge without explicit user confirmation.**

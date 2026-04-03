@@ -78,7 +78,7 @@ Create `.opencode/workflow.json` with the detected settings. The `agents` sectio
     ],
     "reviewers": [
       { "name": "reviewer-glm", "model": "alibaba-coding-plan-cn/glm-5" },
-      { "name": "reviewer-minimax", "model": "alibaba-coding-plan-cn/MiniMax-M2.5" },
+      { "name": "reviewer-minimax", "model": "minimax-cn-coding-plan/MiniMax-M2.7" },
       { "name": "reviewer-qwen", "model": "alibaba-coding-plan-cn/qwen3.5-plus" },
       { "name": "reviewer-kimi", "model": "alibaba-coding-plan-cn/kimi-k2.5" },
       { "name": "reviewer-ark", "model": "volcengine-plan/ark-code-latest" },

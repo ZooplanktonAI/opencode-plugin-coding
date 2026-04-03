@@ -24,17 +24,19 @@ opencode-plugin-coding/
 ├── skills/
 │   ├── brainstorm/SKILL.md                 # Socratic design interview
 │   ├── plan/SKILL.md                       # Task decomposition + plan-to-disk
-│   ├── orchestrate/SKILL.md                # Full multi-agent workflow (~430 lines)
+│   ├── orchestrate/SKILL.md                # Full multi-agent workflow (~450 lines)
 │   ├── test-driven-development/SKILL.md    # RED-GREEN-REFACTOR cycle
 │   ├── systematic-debugging/SKILL.md       # 4-phase debugging
 │   ├── git-worktree/SKILL.md               # Worktree management
 │   └── playwright/SKILL.md                 # MCP-based browser automation
 ├── templates/
 │   ├── workflow.json                       # Template for /zooplankton-coding-init
+│   ├── workflow-local.json                 # Template for workflow-local.json
 │   ├── plan.md                             # Plan file template
 │   └── retrospective.md                    # Retrospective template
 ├── doc/
-│   ├── IMPLEMENTATION_PLAN.md              # Canonical implementation roadmap
+│   ├── archived/                           # Archived docs (stale, kept for reference)
+│   │   └── IMPLEMENTATION_PLAN.md          # Original implementation roadmap (archived)
 │   ├── SMOKE_TEST.md                       # Orchestrate flow smoke-test checklist
 │   └── TODO.md                             # Deferred advisory items from reviews
 ├── tests/
@@ -119,7 +121,7 @@ When set, agents are instructed to prefix all `gh` commands with `GH_TOKEN=$(gh 
 ## Gotchas
 
 - **`package.json` main** points to `.opencode/plugins/opencode-plugin-coding.js` — this is intentional for the plugin system, not a mistake.
-- **The orchestrate skill is the largest file** (~430 lines). When editing, be careful with the phase structure. Use targeted edits, not full rewrites.
+- **The orchestrate skill is the largest file** (~450 lines). When editing, be careful with the phase structure. Use targeted edits, not full rewrites.
 - **`.opencode/reviewer-knowledge.json`** is gitignored and ephemeral. Accept loss on fresh clone.
 - **Plan/retrospective files** are gitignored. Only completed plans >7 days old are auto-deleted; stale non-completed plans trigger alerts.
 - **Use `<<'EOF'` (single-quoted)** in heredocs within skill/guide bash examples to prevent shell variable expansion inside JSON.
