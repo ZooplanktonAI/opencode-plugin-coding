@@ -28,6 +28,7 @@ Use the `read` tool to read `AGENTS.md` and any security-relevant docs from `wor
 ### Step 2: Read the code changes
 
 ```bash
+git fetch origin
 git diff origin/<defaultBranch>..origin/$BRANCH
 git log origin/<defaultBranch>..origin/$BRANCH --oneline
 ```

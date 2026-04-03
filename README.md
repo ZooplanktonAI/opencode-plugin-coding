@@ -25,14 +25,7 @@ A shared [OpenCode](https://opencode.ai) plugin for multi-agent software develop
 
 Guide files define the prompt and behavior for each agent role. The plugin loads them automatically — they are not installed in consumer projects.
 
-Each guide file at the original path is a **dispatcher** that loads the correct platform variant (`-github.md` or `-local.md`) based on `project.platform` in `workflow.json`.
-
-- `guides/core-coder-guide.md` — Dispatcher for core coder instructions
-- `guides/core-reviewer-guide.md` — Dispatcher for core reviewer instructions
-- `guides/reviewer-guide.md` — Dispatcher for normal reviewer instructions
-- `guides/security-reviewer-guide.md` — Dispatcher for security reviewer instructions
-
-### Platform variants
+Each role has two platform variants (`-github.md` and `-local.md`). The plugin selects the correct variant at registration time based on `project.platform` in `workflow.json` and injects its content directly into the agent's prompt. No runtime file resolution is needed.
 
 | Guide | GitHub variant | Local variant |
 |-------|---------------|---------------|

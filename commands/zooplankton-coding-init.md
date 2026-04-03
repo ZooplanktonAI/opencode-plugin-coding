@@ -28,6 +28,8 @@ Determine whether this project should use `github` or `local` mode:
    - If the URL is a non-GitHub remote (e.g., GitLab, Bitbucket, self-hosted) — set `platform` to `"local"`
    - If no remote exists (`git remote get-url origin` fails) — set `platform` to `"local"`
    - **Note:** GitHub Enterprise instances with custom domains (not `github.com`) will auto-detect as `local`. Users should set `platform: "github"` manually in `workflow.json` if they want the full GitHub API workflow.
+   - **Note:** Local mode still requires a git remote named `origin` for the orchestrate workflow (`git fetch`, `git push`). If no remote exists, the user must add one before running orchestrate (e.g., `git remote add origin <url>`).
+   - **Note:** Local mode requires a git remote named `origin` for the orchestrate workflow (`git fetch`, `git push`). If no remote exists yet, the user must add one (`git remote add origin <url>`) before running the orchestrate skill, or orchestration commands that reference `origin` will fail.
 2. **Manual override:** The user can always change `project.platform` in `workflow.json` after init. Document this in the summary output.
 
 ### Stack detection

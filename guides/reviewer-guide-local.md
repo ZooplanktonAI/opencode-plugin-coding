@@ -35,6 +35,7 @@ Use the `read` tool to read file contents directly:
 ### Step 2: Read the changes
 
 ```bash
+git fetch origin
 git diff origin/<defaultBranch>..origin/$BRANCH
 git log origin/<defaultBranch>..origin/$BRANCH --oneline
 ```
