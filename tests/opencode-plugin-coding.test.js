@@ -397,6 +397,8 @@ describe("registerAgents", () => {
     assert.equal(perms.bash["gh pr diff *"], "allow");
     assert.equal(perms.bash["gh pr view *"], "allow");
     assert.equal(perms.bash["gh pr checks *"], "allow");
+    assert.equal(perms.bash["git diff *"], "allow");
+    assert.equal(perms.bash["git log *"], "allow");
     assert.equal(perms.read, "allow");
     assert.equal(perms.webfetch, "deny");
   });
@@ -440,6 +442,8 @@ describe("registerAgents", () => {
     assert.equal(perms.bash["gh pr diff *"], "allow");
     assert.equal(perms.bash["gh pr view *"], "allow");
     assert.equal(perms.bash["gh pr checks *"], "allow");
+    assert.equal(perms.bash["git diff *"], "allow");
+    assert.equal(perms.bash["git log *"], "allow");
     assert.equal(perms.read, "allow");
     assert.equal(perms.webfetch, "deny");
   });
